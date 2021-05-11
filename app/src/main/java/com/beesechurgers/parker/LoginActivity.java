@@ -8,6 +8,8 @@ import android.util.Patterns;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 
+import org.jetbrains.annotations.NotNull;
+
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
@@ -32,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         findViewById(R.id.sign_up_btn).setOnClickListener(v -> startActivity(new Intent(this, SignUp.class)));
     }
 
+    @NotNull
     private String validateEmail() {
         String email = emailInput.getText().toString().trim();
         if (email.isEmpty()) {
@@ -45,13 +48,14 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @NotNull
     private String validatePassword() {
         String password = passwordInput.getText().toString().trim();
         if (password.isEmpty()) {
-            emailInput.setError("Empty Password");
+            passwordInput.setError("Empty Password");
             return "None";
         } else if (password.length() < 6) {
-            emailInput.setError("Password length < 6");
+            passwordInput.setError("Password length < 6");
             return "None";
         } else {
             return password;
