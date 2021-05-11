@@ -1,76 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
     tools:context=".SignUp">
-    <TextView
-        android:text = "Sign Up"
-        android:layout_width="wrap_content"
-        android:layout_height = "wrap_content"
-        android:textSize = "35dp"
-        android:layout_alignParentTop = "true"
-        android:layout_centerHorizontal = "true"
-        tools:ignore="MissingConstraints" />
-    <EditText
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="96dp"
-        android:layout_marginEnd="24dp"
-        android:hint="Car Number"
-        android:inputType="textEmailAddress"
-        android:selectAllOnFocus="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <EditText
-        android:id="@+id/username"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="150dp"
-        android:layout_marginEnd="24dp"
-        android:hint="Password"
-        android:inputType="textEmailAddress"
-        android:selectAllOnFocus="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <EditText
-        android:id="@+id/password"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:hint="Email"
-        android:inputType="textPassword"
-        android:selectAllOnFocus="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username" />
-    <Button
-        android:id="@+id/login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="48dp"
-        android:layout_marginBottom="64dp"
-        android:enabled="false"
-        android:text="sign up"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password"
-        app:layout_constraintVertical_bias="0.2" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="56dp"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/sign_up"
+            android:textColor="@color/colorAccent"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="8dp"
+            app:boxStrokeColor="@color/colorAccent"
+            app:boxStrokeWidth="0.4dp"
+            app:errorEnabled="true"
+            app:hintAnimationEnabled="true"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/colorAccent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/sign_up_number_plate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="true"
+                android:fontFamily="@font/jet_brains_mono"
+                android:hint="@string/car_number"
+                android:importantForAutofill="no"
+                android:inputType="textCapCharacters"
+                android:padding="12dp"
+                android:textCursorDrawable="@null"
+                android:textSize="15sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:boxStrokeColor="@color/colorAccent"
+            app:boxStrokeWidth="0.4dp"
+            app:errorEnabled="true"
+            app:hintAnimationEnabled="true"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/colorAccent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/sign_up_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="true"
+                android:fontFamily="@font/jet_brains_mono"
+                android:hint="@string/email_id"
+                android:importantForAutofill="no"
+                android:inputType="textEmailAddress"
+                android:padding="12dp"
+                android:textCursorDrawable="@null"
+                android:textSize="15sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:boxStrokeColor="@color/colorAccent"
+            app:boxStrokeWidth="0.4dp"
+            app:errorEnabled="true"
+            app:hintAnimationEnabled="true"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/colorAccent"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/colorAccent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/sign_up_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="true"
+                android:fontFamily="@font/jet_brains_mono"
+                android:hint="@string/password"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:textCursorDrawable="@null"
+                android:textSize="14sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sign_up_final"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="16dp"
+            android:text="@string/sign_up"
+            app:backgroundTint="@color/colorAccent" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

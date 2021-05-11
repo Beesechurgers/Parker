@@ -8,10 +8,10 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorAccent">#0336FF</color>
+    <color name="colorPrimary">#121212</color>
+    <color name="colorAccent">#6B74FF</color>
     <color name="yellow">#FFDE03</color>
-    <color name="textColor">#FBFBFB</color>
+    <color name="textColor">#242424</color>
 
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#666</color>
 </resources>
