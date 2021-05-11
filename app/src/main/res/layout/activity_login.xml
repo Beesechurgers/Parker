@@ -83,6 +83,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/login_btn"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -114,11 +115,16 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/sign_up_btn"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:text="@string/sign_up"
-        app:backgroundTint="@color/colorAccent" />
+        android:textColor="@color/colorAccent"
+        app:backgroundTint="@color/colorPrimary"
+        app:rippleColor="@color/colorAccent"
+        app:strokeColor="@color/colorAccent"
+        app:strokeWidth="0.5dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
