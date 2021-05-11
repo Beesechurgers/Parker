@@ -6,4 +6,6 @@
     <string name="email_id">Email ID</string>
     <string name="password">Password</string>
     <string name="car_number">Car Number</string>
+    <string name="car_number_importance">You cannot use this app without providing your car number.</string>
+    <string name="complete_registration">Complete Registration</string>
 </resources>

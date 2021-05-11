@@ -9,6 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkerApp">
+        <activity android:name=".CarNumberActivity"></activity>
+        <activity android:name=".MainActivity" />
         <activity
             android:name=".SignUpActivity"
             android:windowSoftInputMode="adjustPan" />

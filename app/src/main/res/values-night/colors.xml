@@ -11,7 +11,7 @@
     <color name="colorPrimary">#121212</color>
     <color name="colorAccent">#6B74FF</color>
     <color name="yellow">#FFDE03</color>
-    <color name="textColor">#242424</color>
+    <color name="textColor">#FBFBFB</color>
     <color name="stroke">#444444</color>
 
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#666</color>

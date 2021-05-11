@@ -44,18 +44,20 @@ object Utils {
 
     @JvmStatic
     fun validateCarNumber(carNumberInput: AppCompatEditText): String {
-        val number = carNumberInput.text?.toString()?.trim()
+        val number = carNumberInput.text?.toString()?.trim()?.replace(" ", "");
         number ?: return INVALID_STRING
         return when {
             number.isEmpty() -> {
                 carNumberInput.error = "Empty"
                 INVALID_STRING
             }
-            Pattern.matches("[A-Z]{2}[0-9]{1,2}(?:[A-Z])?(?:[A-Z]*)?[0-9]{4}", number) -> number
+            number.isValidCarNumber() -> number
             else -> {
                 carNumberInput.error = "Invalid Number"
                 INVALID_STRING
             }
         }
     }
+
+    fun String.isValidCarNumber() = Pattern.matches("[A-Z]{2}[0-9]{1,2}(?:[A-Z])?(?:[A-Z]*)?[0-9]{4}", this)
 }
