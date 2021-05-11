@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.sign_up_btn).setOnClickListener(v -> startActivity(new Intent(this, SignUp.class)));
+        findViewById(R.id.sign_up_btn).setOnClickListener(v -> startActivity(new Intent(this, SignUpActivity.class)));
     }
 
     @NotNull
