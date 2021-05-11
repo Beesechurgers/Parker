@@ -8,6 +8,8 @@ import android.util.Patterns;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 
+import com.beesechurgers.parker.utils.Utils;
+
 import org.jetbrains.annotations.NotNull;
 
 public class LoginActivity extends AppCompatActivity {
@@ -25,40 +27,12 @@ public class LoginActivity extends AppCompatActivity {
         passwordInput = findViewById(R.id.login_password);
 
         findViewById(R.id.login_btn).setOnClickListener(v -> {
-            String email = validateEmail(), password = validatePassword();
-            if (!email.equals("None") && !password.equals("None")) {
+            String email = Utils.validateEmail(emailInput), password = Utils.validatePassword(passwordInput);
+            if (!email.equals(Utils.INVALID_STRING) && !password.equals(Utils.INVALID_STRING)) {
                 Log.d(TAG, "Login: onClick: Continue Login");
             }
         });
 
         findViewById(R.id.sign_up_btn).setOnClickListener(v -> startActivity(new Intent(this, SignUpActivity.class)));
-    }
-
-    @NotNull
-    private String validateEmail() {
-        String email = emailInput.getText().toString().trim();
-        if (email.isEmpty()) {
-            emailInput.setError("Empty Email");
-            return "None";
-        } else if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return email;
-        } else {
-            emailInput.setError("Invalid Email");
-            return "None";
-        }
-    }
-
-    @NotNull
-    private String validatePassword() {
-        String password = passwordInput.getText().toString().trim();
-        if (password.isEmpty()) {
-            passwordInput.setError("Empty Password");
-            return "None";
-        } else if (password.length() < 6) {
-            passwordInput.setError("Password length < 6");
-            return "None";
-        } else {
-            return password;
-        }
     }
 }

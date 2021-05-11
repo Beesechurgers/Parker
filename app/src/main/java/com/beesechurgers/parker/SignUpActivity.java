@@ -7,6 +7,8 @@ import android.util.Patterns;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 
+import com.beesechurgers.parker.utils.Utils;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
@@ -27,52 +29,11 @@ public class SignUpActivity extends AppCompatActivity {
         passwordInput = findViewById(R.id.sign_up_password);
 
         findViewById(R.id.sign_up_final).setOnClickListener(v -> {
-            String number = validateCarNumber(), email = validateEmail(), password = validatePassword();
-            if (!email.equals("None") && !password.equals("None") && !number.equals("None")) {
+            String number = Utils.validateCarNumber(carNumberInput),
+                email = Utils.validateEmail(emailInput), password = Utils.validatePassword(passwordInput);
+            if (!email.equals(Utils.INVALID_STRING) && !password.equals(Utils.INVALID_STRING) && !number.equals(Utils.INVALID_STRING)) {
                 Log.d(TAG, "SignUp: onClick: Continue Sign up");
             }
         });
-    }
-
-    @NotNull
-    private String validateCarNumber() {
-        String number = carNumberInput.getText().toString().trim();
-        if (number.isEmpty()) {
-            carNumberInput.setError("Empty");
-            return "None";
-        } else if (Pattern.matches("[A-Z]{2}[0-9]{1,2}(?:[A-Z])?(?:[A-Z]*)?[0-9]{4}", number)) {
-            return number;
-        } else {
-            carNumberInput.setError("Invalid Number");
-            return "None";
-        }
-    }
-
-    @NotNull
-    private String validateEmail() {
-        String email = emailInput.getText().toString().trim();
-        if (email.isEmpty()) {
-            emailInput.setError("Empty Email");
-            return "None";
-        } else if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return email;
-        } else {
-            emailInput.setError("Invalid Email");
-            return "None";
-        }
-    }
-
-    @NotNull
-    private String validatePassword() {
-        String password = passwordInput.getText().toString().trim();
-        if (password.isEmpty()) {
-            passwordInput.setError("Empty Password");
-            return "None";
-        } else if (password.length() < 6) {
-            passwordInput.setError("Password length < 6");
-            return "None";
-        } else {
-            return password;
-        }
     }
 }
