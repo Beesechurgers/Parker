@@ -1,18 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".SplashActivity">
 
-    <TextView
+    <RelativeLayout
+        android:id="@+id/login_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Loading"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="56dp"
+        android:visibility="gone">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ProgressBar
+            android:id="@+id/login_progress"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerInParent="true"
+            android:indeterminateTint="@color/colorPrimary"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sign_in_google"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="16dp"
+            android:text="@string/sign_in_with_google"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            app:backgroundTint="@android:color/white"
+            app:icon="@drawable/google_button"
+            app:iconGravity="start"
+            app:iconPadding="8dp"
+            app:iconSize="26dp"
+            app:iconTint="@null"
+            app:iconTintMode="src_over"
+            app:rippleColor="#DFDFDF" />
+
+    </RelativeLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

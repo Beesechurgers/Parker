@@ -13,6 +13,7 @@
     <color name="yellow">#FFDE03</color>
     <color name="textColor">#242424</color>
     <color name="stroke">#DADADA</color>
+    <color name="red">#E53935</color>
 
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#666</color>
 </resources>
