@@ -1,6 +1,7 @@
 package com.beesechurgers.parker
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -132,5 +133,10 @@ class SplashActivity : AppCompatActivity() {
                 login_progress.visibility = View.GONE
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 }

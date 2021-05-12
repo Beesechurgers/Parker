@@ -9,10 +9,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkerApp">
-        <activity android:name=".CarNumberActivity" />
-        <activity android:name=".MainActivity" />
+        <activity
+            android:name=".CarNumberActivity"
+            android:configChanges="uiMode" />
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="uiMode" />
         <activity
             android:name=".SplashActivity"
+            android:configChanges="uiMode"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

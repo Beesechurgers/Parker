@@ -1,6 +1,7 @@
 package com.beesechurgers.parker
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -81,5 +82,10 @@ class CarNumberActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 }

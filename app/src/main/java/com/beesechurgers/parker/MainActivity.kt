@@ -1,6 +1,7 @@
 package com.beesechurgers.parker
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.beesechurgers.parker.utils.PrefKeys
@@ -21,5 +22,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SplashActivity::class.java)
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 }
