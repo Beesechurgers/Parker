@@ -37,7 +37,7 @@ class Detector:
 
     def __format_text(self, text):
         filtered = [x for x in list(text) if x in string.ascii_letters + string.digits]
-        literal = ''.join(filtered).upper().strip()
+        literal = ''.join(filtered).upper().strip().replace(" ", "")
         if len(literal) == 0:
             return 'None'
         else:
@@ -123,7 +123,7 @@ with open("car.jpg", 'rb') as fp:
     response = requests.post('https://api.platerecognizer.com/v1/plate-reader/',
                              data=dict(regions=['in'], config=json.dumps(dict(region="plate"))), files=dict(upload=fp),
                              headers={'Authorization': 'Token ' + sys.argv[1]})
-license_number = str(response.json()["results"][0]["plate"]).upper()
+license_number = str(response.json()["results"][0]["plate"]).upper().strip().replace(" ", "")
 if re.match(detector.regex, license_number):
     os.remove("car.jpg")
     f = open("license_number.txt", "w")
