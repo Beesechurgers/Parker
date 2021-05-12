@@ -16,3 +16,5 @@ Backend/.vscode
 Backend/firebase_cpp_sdk
 Backend/build
 Backend/*.json
+Backend/utils
+Backend/helpers/*.jpg

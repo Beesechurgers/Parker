@@ -30,6 +30,7 @@ firebase::auth::User *user = nullptr;
 firebase::database::Database *pDatabaseInstance = nullptr;
 
 std::vector<std::string> numberPlates;
+std::string API_KEY;
 bool loginCompleted = false;
 
 int getOption();
@@ -37,6 +38,8 @@ int getOption();
 std::string getNumberPlate();
 
 void cleanData();
+
+void initApiKey();
 
 class UsersValueListener : public firebase::database::ValueListener {
 public:
@@ -68,6 +71,7 @@ public:
 };
 
 int main() {
+    initApiKey();
     auto pFirebaseApp = std::unique_ptr<::firebase::App>(::firebase::App::Create());
     auto pFirebaseAuth = std::unique_ptr<::firebase::auth::Auth>(::firebase::auth::Auth::GetAuth(pFirebaseApp.get()));
 
@@ -84,6 +88,7 @@ int main() {
             pFirebaseAuth->SignInWithEmailAndPassword("admin@beesechurgers.com", "cheese")
                     .OnCompletion([](const firebase::Future<firebase::auth::User *> &res) {
                         user = *res.result();
+                        std::cout << "Logged in: " << user->uid() << "\n";
 
                         pDatabaseInstance->GetReference(USERS).GetValue()
                                 .OnCompletion([](const firebase::Future<firebase::database::DataSnapshot> &snapshot) {
@@ -108,7 +113,6 @@ int main() {
                                                         loginCompleted = true;
                                                     });
                                         } else {
-                                            std::cout << "User exists; Logged in: " << user->uid() << "\n";
                                             loginCompleted = true;
                                         }
                                     }
@@ -127,8 +131,7 @@ int main() {
 //        system("clear");
 
         if (option == '1') {
-            std::cout << "Detecting\n";
-            int completed = system("cd helpers && python3 detector.py 1");
+            int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 1")[0]);
             if (completed == 0) {
                 std::cout << "Task completed\n";
                 std::string plate = getNumberPlate();
@@ -138,7 +141,7 @@ int main() {
                 }
                 std::cout << "License Number: " << plate << "\n";
 
-
+                sProgramStatus = ProgramStatus::ENTER_QR_SCAN;
                 auto it = find(numberPlates.begin(), numberPlates.end(), plate);
                 if (it == numberPlates.end()) {
                     numberPlates.push_back(plate);
@@ -158,8 +161,7 @@ int main() {
             }
 
         } else if (option == '2') {
-            std::cout << "Detecting\n";
-            int completed = system("cd helpers && python3 detector.py 2");
+            int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 2")[0]);
             if (completed == 0) {
                 std::cout << "Task completed\n";
                 std::string plate = getNumberPlate();
@@ -180,6 +182,7 @@ int main() {
 
                     std::cout << "Car exited\n\n";
                 }
+                goto loop;
             }
 
         } else if (option == 'q') {
@@ -223,6 +226,7 @@ std::string getNumberPlate() {
     std::fstream licenseFile("helpers/license_number.txt");
     std::string line;
     getline(licenseFile, line);
+    licenseFile.close();
     return line;
 }
 
@@ -234,4 +238,10 @@ void cleanData() {
 
     // Clear last generated QR Code
     remove("helpers/qrcode.jpg");
+}
+
+void initApiKey() {
+    std::ifstream apiTxt("utils/api.txt");
+    getline(apiTxt, API_KEY);
+    apiTxt.close();
 }

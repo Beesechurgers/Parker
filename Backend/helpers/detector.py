@@ -20,6 +20,9 @@ import cv2
 import imutils
 import numpy as np
 import pytesseract
+import requests
+import os
+import json
 
 
 class Detector:
@@ -42,14 +45,15 @@ class Detector:
 
     def detect_license_number(self):
         if self.camera is None:
-            return "None"
+            return
         if not self.camera.isOpened():
-            return "None"
+            return
 
         while True:
             ret, frame = self.camera.read()
 
             img = frame
+            std_img = frame.copy()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gray = cv2.bilateralFilter(gray, 13, 15, 15)
 
@@ -86,11 +90,12 @@ class Detector:
                     # print(f"Detected: {text}")
                     self.detected = text
                     self.stop_camera()
-                    return text
+                    cv2.imwrite("car.jpg", std_img)
+                    break
 
             cv2.imshow('Capture', frame)
             if cv2.waitKey(10) == ord('q'):
-                return "None"
+                break
 
     def start_camera(self):
         if self.camera is None:
@@ -108,15 +113,27 @@ class Detector:
             return self.detected
 
 
+print("Detecting ...")
 detector = Detector()
 detector.start_camera()
-license_number = detector.detect_license_number()
+detector.detect_license_number()
+cv2.destroyAllWindows()
 
-f = open("license_number.txt", "w")
-f.write(license_number)
-f.close()
+with open("car.jpg", 'rb') as fp:
+    response = requests.post('https://api.platerecognizer.com/v1/plate-reader/',
+                             data=dict(regions=['in'], config=json.dumps(dict(region="plate"))), files=dict(upload=fp),
+                             headers={'Authorization': 'Token ' + sys.argv[1]})
+license_number = str(response.json()["results"][0]["plate"]).upper()
+if re.match(detector.regex, license_number):
+    os.remove("car.jpg")
+    f = open("license_number.txt", "w")
+    f.write(license_number)
+    f.close()
+else:
+    print("Invalid car number")
+    exit(1)
 
-if sys.argv[1] == '1':
+if sys.argv[2] == '1':
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=25, border=2)
     qr.add_data(license_number)
     qr.make(fit=True)
