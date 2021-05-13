@@ -23,6 +23,7 @@ import pytesseract
 import requests
 import os
 import json
+import uuid
 
 
 class Detector:
@@ -119,6 +120,8 @@ detector.start_camera()
 detector.detect_license_number()
 cv2.destroyAllWindows()
 
+session_id = str(uuid.uuid4())
+
 with open("car.jpg", 'rb') as fp:
     response = requests.post('https://api.platerecognizer.com/v1/plate-reader/',
                              data=dict(regions=['in'], config=json.dumps(dict(region="plate"))), files=dict(upload=fp),
@@ -129,13 +132,17 @@ if re.match(detector.regex, license_number):
     f = open("license_number.txt", "w")
     f.write(license_number)
     f.close()
+
+    s = open("session.txt", "w")
+    s.write(session_id)
+    s.close()
 else:
     print("Invalid car number")
     exit(1)
 
 if sys.argv[2] == '1':
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=25, border=2)
-    qr.add_data(license_number)
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=15, border=2)
+    qr.add_data(session_id + "/" + license_number)
     qr.make(fit=True)
 
     qr.make_image(fill_color="black", back_color="white").save("qrcode.jpg")
