@@ -9,6 +9,8 @@ const val PKG_PREF = "_parker"
 object PrefKeys {
     // String key
     const val CAR_NUMBER = "car_number"
+
+    const val USER_PHOTO = "photo_url"
 }
 
 fun Context.putString(key: String, value: String) =

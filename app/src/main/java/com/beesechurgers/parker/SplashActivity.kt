@@ -111,6 +111,11 @@ class SplashActivity : AppCompatActivity() {
                     mAuth.signInWithCredential(GoogleAuthProvider.getCredential(account.idToken, null))
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
+                                val photoUrl = account.photoUrl
+                                if (photoUrl != null) {
+                                    putString(PrefKeys.USER_PHOTO, photoUrl.toString())
+                                }
+
                                 val user = mAuth.currentUser
                                 if (user != null) {
                                     handleUser(account.givenName.toString(), user)

@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
         logout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
-            putString(PrefKeys.CAR_NUMBER, Utils.INVALID_STRING)
+            Utils.clearUserData(this)
             startActivity(Intent(this, SplashActivity::class.java)
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
         }

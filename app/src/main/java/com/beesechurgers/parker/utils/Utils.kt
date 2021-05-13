@@ -1,5 +1,6 @@
 package com.beesechurgers.parker.utils
 
+import android.content.Context
 import androidx.appcompat.widget.AppCompatEditText
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -10,6 +11,14 @@ import java.util.regex.Pattern
 object Utils {
 
     const val INVALID_STRING = "#@$"
+
+    @JvmStatic
+    fun clearUserData(context: Context) {
+        with(INVALID_STRING) {
+            context.putString(PrefKeys.CAR_NUMBER, this)
+            context.putString(PrefKeys.USER_PHOTO, this)
+        }
+    }
 
     @JvmStatic
     fun validateCarNumber(carNumberInput: AppCompatEditText): String {

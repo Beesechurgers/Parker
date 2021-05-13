@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Parker-App</string>
+    <string name="app_name">Parker</string>
     <string name="sign_up">Sign up</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="login">Login</string>
