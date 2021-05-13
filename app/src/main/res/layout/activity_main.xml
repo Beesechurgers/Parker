@@ -16,9 +16,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:padding="8dp"
                 android:text="@string/app_name"
@@ -36,15 +36,15 @@
 
         </RelativeLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/logout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_margin="16dp"
-        android:text="@string/sign_out"
-        android:textAllCaps="false"
-        app:backgroundTint="@color/red" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="16dp"
+            android:text="@string/sign_out"
+            android:textAllCaps="false"
+            app:backgroundTint="@color/red" />
 
     </LinearLayout>
 
@@ -53,4 +53,27 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Main Activity" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/scanner_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/initialize_session"
+        android:scaleType="center"
+        app:backgroundTint="@color/colorAccent"
+        app:layout_anchor="@id/bar"
+        app:rippleColor="@color/colorPrimary"
+        app:srcCompat="@drawable/ic_outline_qr_code_scanner_24"
+        app:tint="@color/colorPrimary" />
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_gravity="bottom"
+        app:backgroundTint="@color/colorPrimary"
+        app:fabAlignmentMode="center"
+        app:hideOnScroll="true"
+        app:navigationIcon="@drawable/ic_outline_settings_24" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

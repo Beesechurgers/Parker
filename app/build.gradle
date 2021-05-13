@@ -52,7 +52,15 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:21.1.0'
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
+    // CameraX
+    def camerax_version = "1.0.0"
+    implementation "androidx.camera:camera-core:${camerax_version}"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+    implementation "androidx.camera:camera-view:1.0.0-alpha24"
+
     implementation 'com.github.yandextaxitech:binaryprefs:1.0.1'
     implementation 'de.hdodenhof:circleimageview:3.0.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.google.zxing:core:3.3.0'
 }
