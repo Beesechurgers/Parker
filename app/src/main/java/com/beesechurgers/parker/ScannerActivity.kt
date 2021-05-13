@@ -3,14 +3,14 @@ package com.beesechurgers.parker
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Size
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.beesechurgers.parker.utils.QRCodeImageAnalyzer
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.android.synthetic.main.activity_scanner.*
 
@@ -21,6 +21,7 @@ class ScannerActivity : AppCompatActivity() {
     }
 
     private var imageCapture: ImageCapture? = null
+    private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,20 +54,30 @@ class ScannerActivity : AppCompatActivity() {
     private fun startCamera() {
         cameraProviderFuture.addListener({
             try {
-                bindCamera(cameraProviderFuture.get())
+                cameraProvider = cameraProviderFuture.get()
+                bindCamera()
             } catch (e: Exception) {
                 Toast.makeText(this, "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun bindCamera(cameraProvider: ProcessCameraProvider) {
+    private fun bindCamera() {
         val preview = Preview.Builder()/*.setTargetAspectRatio(AspectRatio.RATIO_4_3)*/
             .build().also { it.setSurfaceProvider(camera_preview.surfaceProvider) }
 
         imageCapture = ImageCapture.Builder().build()
 
-        cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)
+        val imageAnalysis = ImageAnalysis.Builder().setTargetResolution(Size(1280, 720))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build().apply {
+                this.setAnalyzer(ContextCompat.getMainExecutor(this@ScannerActivity),
+                    QRCodeImageAnalyzer { data ->
+                        Toast.makeText(this@ScannerActivity, "QRCODE: $data", Toast.LENGTH_SHORT).show()
+                        cameraProvider?.unbindAll()
+                    })
+            }
+
+        cameraProvider?.unbindAll()
+        cameraProvider?.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, imageAnalysis, preview, imageCapture)
     }
 }
