@@ -8,7 +8,7 @@
     <item android:gravity="center">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/google_button" />
+            android:src="@drawable/ic_app" />
     </item>
 
 </layer-list>
