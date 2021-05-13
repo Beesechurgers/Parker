@@ -71,7 +71,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_gravity="bottom"
-        app:backgroundTint="@color/colorPrimary"
+        app:backgroundTint="@color/app_bar_bg"
         app:fabAlignmentMode="center"
         app:hideOnScroll="true"
         app:navigationIcon="@drawable/ic_outline_settings_24" />
