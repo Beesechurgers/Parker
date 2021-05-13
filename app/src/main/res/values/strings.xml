@@ -10,4 +10,11 @@
     <string name="complete_registration">Complete Registration</string>
     <string name="sign_out">Sign out</string>
     <string name="initialize_session">Initialize session</string>
+    <string name="scan">Scan</string>
+    <string name="re_scan">Re-Scan</string>
+    <string name="oops">Oops !</string>
+    <string name="invalid_number_plate_info">The scanned number plate doesn\'t match the registered number plate.</string>
+    <string name="qr_scan_description">Scan the QR Code shown on the panel</string>
+    <string name="parking_area">Parking Area</string>
+    <string name="processing">Processing …</string>
 </resources>
