@@ -39,7 +39,7 @@ std_img = None
 camera = cv2.VideoCapture(0)
 
 signal.signal(signal.SIGALRM, handler)
-signal.alarm(3)
+signal.alarm(5)
 
 
 def format_text(text):
@@ -100,6 +100,7 @@ try:
         if cv2.waitKey(10) == ord('q'):
             break
 finally:
+    signal.alarm(0)
     cv2.destroyAllWindows()
     if not os.path.exists("car.jpg"):
         cv2.imwrite("car.jpg", std_img)
@@ -130,5 +131,5 @@ finally:
         qr.add_data(session_id + "/" + license_number)
         qr.make(fit=True)
 
-        qr.make_image(fill_color="black", back_color="white").save("qrcode.jpg")
+        qr.make_image(fill_color="black", back_color="white").save("qrcode.png")
     exit(0)
