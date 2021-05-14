@@ -12,33 +12,57 @@
  * copies or substantial portions of the Software.
  */
 
+#define INVALID_STRING "#$@"
+
 /*
  * Database
  *    |
  *    `- Users
- *        |
- *        `- 28373-dijifdiufvh8732-dfoijdf09u
- *        |      |
- *        |      `- NUMBER_PLATE: XYZ-XYZ-XYZ
- *        |      `- CAR_STATUS: `entered` / `exited`
- *        |      `- ENTERED_TIME: -1 / 82372323223
- *        |      `- EXITED_TIME: -1 / 29898749843
- *        |      `- LAST_LOCATION
- *        |             |
- *        |             `- LAT: 101.20020202
- *        |             `- LONG: 2.3844944949
- *        |
- *        |
- *        `- ujf74-dj37r0fk-keiby3img-kwmcg6u
+ *    |   |
+ *    |   `- USER_UID
+ *    |   |      |
+ *    |   |      `- NUMBER_PLATE: XYZ-XYZ-XYZ
+ *    |   |      `- CAR_STATUS: `entered` / `exited`
+ *    |   |      `- ENTERED_TIME: -1 / 82372323223
+ *    |   |      `- EXITED_TIME: -1 / 29898749843
+ *    |   |      `- LAST_LOCATION
+ *    |   |             |
+ *    |   |             `- LAT: 101.20020202
+ *    |   |             `- LONG: 2.3844944949
+ *    |   |      `- PAYMENT
+ *    |   |            |
+ *    |   |            `- PAYMENT_STATUS: Completed / Pending
+ *    |   |            `- PAYMENT_AMOUNT: 0 / amount
+ *    |   |
+ *    |   |
+ *    |   `- USER_UID
+ *    |         |
+ *    |         `- NUMBER_PLATE: ABC-ABC-ABC
+ *    |         `- CAR_STATUS: `entered` / `exited`
+ *    |         `- ENTERED_TIME: -1 / 2535322879
+ *    |         `- EXITED_TIME: -1 / 6478690504
+ *    |         `- LAST_LOCATION
+ *    |                 |
+ *    |                 `- LAT: 101.20020202
+ *    |                 `- LONG: 2.3844944949
+ *    |         `- PAYMENT
+ *    |               |
+ *    |               `- PAYMENT_STATUS: Completed / Pending
+ *    |               `- PAYMENT_AMOUNT: 0 / amount
+ *    |
+ *    `- Active
+ *    |    |
+ *    |    `- USER UID
+ *    |          `- SESSION: 3d76ee7b-6439-4232-abc2-184b67416c9e [SESSION UUID]
+ *    |
+ *    `- History
+ *         |
+ *         `- USER_UID
  *              |
- *              `- NUMBER_PLATE: ABC-ABC-ABC
- *              `- CAR_STATUS: `entered` / `exited`
- *              `- ENTERED_TIME: -1 / 2535322879
- *              `- EXITED_TIME: -1 / 6478690504
- *               `- LAST_LOCATION
- *                      |
- *                      `- LAT: 101.20020202
- *                      `- LONG: 2.3844944949
+ *              `- PAYMENT:
+ *                      ...
+ *                      ...
+ *                      ...
  */
 
 #define USERS "Users"
@@ -53,10 +77,20 @@
 #define INVALID_TIME -1L
 
 #define PAYMENT "payment"
+#define PAYMENT_STATUS "status"
 #define PAYMENT_COMPLETED "completed"
 #define PAYMENT_PENDING "pending"
+#define PAYMENT_AMOUNT "amount"
+#define PER_HOUR 50     // Rupees
+#define PER_15_MIN 10   // Rupees
 
 #define LAST_LOCATION "last_location"
 #define LAT "latitude"
 #define LONG "longitude"
 #define INVALID_LOCATION 0.0
+
+#define ACTIVE "Active"
+#define SESSION "session_id"
+#define INVALID_SESSION "__null__"
+
+#define HISTORY "History"
