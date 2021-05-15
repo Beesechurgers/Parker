@@ -2,6 +2,7 @@
 .gradle
 local.properties
 .idea
+.vscode
 app/build
 app/release
 app/*.json
@@ -18,3 +19,4 @@ Backend/build
 Backend/*.json
 Backend/utils
 Backend/helpers/*.jpg
+Backend/log.txt

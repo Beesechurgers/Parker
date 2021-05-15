@@ -18,20 +18,23 @@
 #include <fstream>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <future>
 #include "database_constants.h"
+#include "log.hpp"
 
-enum ProgramStatus {
-    ENTER_QR_SCAN, EXIT_QR_SCAN, IDLE
+struct CarUser {
+    std::string carNumber = INVALID_STRING,
+            user_uid = INVALID_STRING;
+    long long enteredTime = 0LL;
 };
-
-ProgramStatus sProgramStatus = ProgramStatus::IDLE;
 
 firebase::auth::User *user = nullptr;
 firebase::database::Database *pDatabaseInstance = nullptr;
 
-std::vector<std::string> numberPlates;
+std::vector<CarUser> numberPlates;
 std::string API_KEY;
-bool loginCompleted = false;
+bool loginCompleted = false, qrScanned = true, errorTriggered = false;
+Logger logger;
 
 int getOption();
 
@@ -41,54 +44,103 @@ void cleanData();
 
 void initApiKey();
 
+std::string getSessionID();
+
+void updateNumberList(const firebase::database::DataSnapshot &snapshot);
+
+double getPayment(long long timeElapsed);
+
 class UsersValueListener : public firebase::database::ValueListener {
 public:
     ~UsersValueListener() override = default;
 
     void OnValueChanged(const firebase::database::DataSnapshot &snapshot) override {
-        if (!loginCompleted) return;
-        if (sProgramStatus == ProgramStatus::ENTER_QR_SCAN) {
-            sProgramStatus = ProgramStatus::IDLE;
-            return;
-        }
-        if (sProgramStatus == ProgramStatus::EXIT_QR_SCAN) {
-            sProgramStatus = ProgramStatus::IDLE;
-            return;
-        }
-        if (sProgramStatus == ProgramStatus::IDLE) {
-            numberPlates.clear();
-            for (const auto &child : snapshot.children()) {
-                if (child.Child(CAR_STATUS).value().mutable_string() == ENTERED) {
-                    numberPlates.push_back(child.Child(NUMBER_PLATE).value().mutable_string());
-                }
+        try {
+            if (qrScanned) {
+                std::async(std::launch::async, updateNumberList, snapshot).wait();
             }
+        } catch (std::exception &e) {
+            logger << "[UsersValueListener] Error: " << e.what() >> true;
+            errorTriggered = true;
         }
     }
 
     void OnCancelled(const firebase::database::Error &error, const char *error_message) override {
-
+        logger << "[UsersValueListener] DatabaseError: " << error_message >> true;
     }
 };
 
-int main() {
+class ActiveValueListener : public firebase::database::ValueListener {
+public:
+    ~ActiveValueListener() override = default;
+
+    void OnValueChanged(const firebase::database::DataSnapshot &snapshot) override {
+        try {
+            if (!qrScanned) {
+                std::async(std::launch::async, [&snapshot = snapshot]() {
+                    std::vector<firebase::database::DataSnapshot> children = snapshot.children();
+                    logger << "User scanned" >> false;
+                    std::string currentSession = getSessionID(), user_uid;
+
+                    auto it = std::find_if(children.begin(), children.end(),
+                                           [&session = currentSession]
+                                                   (const firebase::database::DataSnapshot &childSnap) -> bool {
+                                               return childSnap.Child(SESSION).value().mutable_string() == session;
+                                           });
+                    if (it != children.end()) {
+                        long long pos = it - children.begin();
+                        firebase::database::DataSnapshot child = children[pos];
+                        cv::destroyAllWindows();
+
+                        user_uid = child.key_string();
+                        logger << "User entered: " << user_uid >> false;
+                        logger << "Session: " << child.Child(SESSION).value().mutable_string() >> false;
+
+                        std::map<std::string, firebase::Variant> data;
+                        data[CAR_STATUS] = ENTERED;
+                        data[ENTERED_TIME] = std::time(nullptr);
+
+                        pDatabaseInstance->GetReference(USERS).Child(user_uid).UpdateChildren(data);
+                    }
+                }).wait();
+                qrScanned = true;
+            }
+        } catch (std::exception &e) {
+            logger << "[ActiveValueListener] Error: " << e.what() >> true;
+            errorTriggered = true;
+        }
+    }
+
+    void OnCancelled(const firebase::database::Error &error, const char *error_message) override {
+        logger << "[ActiveValueListener] DatabaseError: " << error_message >> true;
+    }
+};
+
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        std::cout << "Invalid arguments\n";
+        return 0;
+    }
+
     initApiKey();
     auto pFirebaseApp = std::unique_ptr<::firebase::App>(::firebase::App::Create());
     auto pFirebaseAuth = std::unique_ptr<::firebase::auth::Auth>(::firebase::auth::Auth::GetAuth(pFirebaseApp.get()));
 
     pDatabaseInstance = ::firebase::database::Database::GetInstance(pFirebaseApp.get());
-    auto mUserRef = pDatabaseInstance->GetReference(USERS);
-    mUserRef.AddValueListener(new UsersValueListener());
+    auto mRootRef = pDatabaseInstance->GetReference();
+    mRootRef.Child(USERS).AddValueListener(new UsersValueListener());
+    mRootRef.Child(ACTIVE).AddValueListener(new ActiveValueListener());
 
     try {
         // ----------------------------------------------------------------------------------------------
         //                                      ADMIN LOGIN
         // ----------------------------------------------------------------------------------------------
         if (!pFirebaseAuth->current_user()) {
-            std::cout << "Logging in...\n";
-            pFirebaseAuth->SignInWithEmailAndPassword("admin@beesechurgers.com", "cheese")
+            logger << "Logging in..." >> true;
+            pFirebaseAuth->SignInWithEmailAndPassword(argv[1], argv[2])
                     .OnCompletion([](const firebase::Future<firebase::auth::User *> &res) {
                         user = *res.result();
-                        std::cout << "Logged in: " << user->uid() << "\n";
+                        logger << "Logged in: " << user->uid() >> true;
 
                         pDatabaseInstance->GetReference(USERS).GetValue()
                                 .OnCompletion([](const firebase::Future<firebase::database::DataSnapshot> &snapshot) {
@@ -96,12 +148,15 @@ int main() {
                                         snapshot.error() == firebase::database::kErrorNone) {
 
                                         if (!snapshot.result()->HasChild(user->uid())) {
-                                            std::map<std::string, firebase::Variant> data, location;
+                                            std::map<std::string, firebase::Variant> data, location, payment;
                                             data[NUMBER_PLATE] = "xyz-xyz-xyz";
                                             data[CAR_STATUS] = EXITED;
                                             data[ENTERED_TIME] = INVALID_TIME;
                                             data[EXITED_TIME] = INVALID_TIME;
-                                            data[PAYMENT] = PAYMENT_COMPLETED;
+
+                                            payment[PAYMENT_STATUS] = PAYMENT_COMPLETED;
+                                            payment[PAYMENT_AMOUNT] = 0;
+                                            data[PAYMENT] = payment;
 
                                             location[LAT] = INVALID_LOCATION;
                                             location[LONG] = INVALID_LOCATION;
@@ -109,7 +164,7 @@ int main() {
 
                                             pDatabaseInstance->GetReference(USERS).Child(user->uid())
                                                     .UpdateChildren(data).OnCompletion([](const auto &res) {
-                                                        std::cout << "User created; Logged in: " << user->uid() << "\n";
+                                                        logger << "User created; Logged in: " << user->uid() >> true;
                                                         loginCompleted = true;
                                                     });
                                         } else {
@@ -117,91 +172,122 @@ int main() {
                                         }
                                     }
                                 });
+
+                        pDatabaseInstance->GetReference(ACTIVE).GetValue()
+                                .OnCompletion([](const firebase::Future<firebase::database::DataSnapshot> &snapshot) {
+                                    if (snapshot.status() == firebase::kFutureStatusComplete &&
+                                        snapshot.error() == firebase::database::kErrorNone) {
+
+                                        if (!snapshot.result()->HasChild(user->uid())) {
+                                            std::map<std::string, firebase::Variant> data;
+                                            data[SESSION] = INVALID_SESSION;
+                                            pDatabaseInstance->GetReference(ACTIVE).Child(user->uid())
+                                                    .UpdateChildren(data);
+                                        }
+                                    }
+                                });
                     });
+        } else {
+            loginCompleted = true;
+            errorTriggered = true;
+            logger << "User was already present\nPlease re-run the program" >> true;
         }
 
         // ----------------------------------------------------------------------------------------------
         //                                   PROCESS / TASK (?)
         // ----------------------------------------------------------------------------------------------
         loop:
-        cleanData();
         if (!loginCompleted) goto loop;
+        if (!qrScanned) goto loop;
+        cleanData();
 
-        int option = getOption();
+        int option;
+        if (errorTriggered) {
+            option = 'q';
+        } else {
+            option = getOption();
+        }
 //        system("clear");
 
         if (option == '1') {
+            logger << "|Option: Enter car|" >> false;
             int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 1")[0]);
             if (completed == 0) {
-                std::cout << "Task completed\n";
+                logger << "Task completed" >> true;
                 std::string plate = getNumberPlate();
                 if (plate == "None") {
-                    std::cout << "Invalid License Number: " << plate << "\n";
+                    logger << "Invalid License Number" >> true;
                     goto loop;
                 }
-                std::cout << "License Number: " << plate << "\n";
+                logger << "License Number: " << plate >> true;
 
-                sProgramStatus = ProgramStatus::ENTER_QR_SCAN;
-                auto it = find(numberPlates.begin(), numberPlates.end(), plate);
-                if (it == numberPlates.end()) {
-                    numberPlates.push_back(plate);
+                qrScanned = false;
 
-                    // Update car status
-                    // std::map<std::string, firebase::Variant> data;
-                    // data[plate] = "Entered";
-                    // pDatabaseInstance->GetReference().Child("number_plates").UpdateChildren(data);
+                logger << "Showing QR Code" >> true;
+                cv::Mat qr = cv::imread("helpers/qrcode.png");
+                cv::namedWindow("QrCode");
+                cv::moveWindow("QrCode", (1980 - 675) / 2, (1080 - 675) / 2);
+                cv::imshow("QrCode", qr);
 
-                    std::cout << "Car entered\n";
-                }
-
-                std::cout << "\nShowing QR Code\n";
-                cv::imshow("QrCode", cv::imread("helpers/qrcode.jpg", cv::IMREAD_GRAYSCALE));
                 cv::waitKey();
-                goto loop;
             }
+            goto loop;
 
         } else if (option == '2') {
+            logger << "|Option: Exit car|" >> false;
             int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 2")[0]);
             if (completed == 0) {
-                std::cout << "Task completed\n";
+                logger << "Task completed" >> true;
                 std::string plate = getNumberPlate();
                 if (plate == "None") {
-                    std::cout << "Invalid License Number: " << plate << "\n";
+                    logger << "Invalid License Number: " << plate >> true;
+                    goto loop;
                 }
-                std::cout << "License Number: " << plate << "\n";
+                logger << "License Number: " << plate >> true;
 
-                auto it = find(numberPlates.begin(), numberPlates.end(), plate);
+                auto it = std::find_if(numberPlates.begin(), numberPlates.end(),
+                                       [&number = plate](const CarUser &c) -> bool {
+                                           return c.carNumber == number;
+                                       });
                 if (it != numberPlates.end()) {
-                    std::cout << "Car was parked\n";
-                    numberPlates.erase(remove(numberPlates.begin(), numberPlates.end(), plate), numberPlates.end());
+                    logger << "Valid car exited" >> true;
+                    logger << "This car belongs to " << it->user_uid >> false;
 
-                    // Update car status
-                    // std::map<std::string, firebase::Variant> data;
-                    // data[plate] = "Exited";
-                    // pDatabaseInstance->GetReference().Child("number_plates").UpdateChildren(data);
+                    std::map<std::string, firebase::Variant> data, payment;
+                    data[CAR_STATUS] = EXITED;
+                    data[ENTERED_TIME] = INVALID_TIME;
+                    data[EXITED_TIME] = std::time(nullptr);
 
-                    std::cout << "Car exited\n\n";
+                    payment[PAYMENT_STATUS] = PAYMENT_PENDING;
+                    payment[PAYMENT_AMOUNT] = getPayment(std::time(nullptr) - it->enteredTime);
+                    data[PAYMENT] = payment;
+
+                    pDatabaseInstance->GetReference(ACTIVE).Child(it->user_uid).RemoveValue();
+                    pDatabaseInstance->GetReference(USERS).Child(it->user_uid).UpdateChildren(data);
+                } else {
+                    logger << "Invalid car trying to exit: " << plate >> true;
                 }
-                goto loop;
             }
+            qrScanned = true;
+            goto loop;
 
-        } else if (option == 'q') {
+        } else {
             cleanData();
         }
     } catch (std::exception &e) {
-        std::cout << "FATAL: " << e.what() << "\n";
+        logger << "FATAL: " << e.what() >> true;
     }
 
     // Logout and clear all instances
     delete pDatabaseInstance;
-    mUserRef.RemoveAllValueListeners();
+    mRootRef.RemoveAllValueListeners();
     if (pFirebaseAuth->current_user()) {
         if (user != nullptr) {
-            std::cout << "Logging out: " << user->uid() << "\n";
+            logger << "Logging out: " << user->uid() >> true;
         }
         pFirebaseAuth->SignOut();
         if (!pFirebaseAuth->current_user()) {
-            std::cout << "Logged out\n";
+            logger << "Logged out" >> true;
         }
     }
     return 0;
@@ -236,12 +322,61 @@ void cleanData() {
     cLicenseFile << "None";
     cLicenseFile.close();
 
+    std::ofstream cSessionFile("helpers/session.txt");
+    cSessionFile << "None";
+    cSessionFile.close();
+
     // Clear last generated QR Code
-    remove("helpers/qrcode.jpg");
+    remove("helpers/qrcode.png");
 }
 
 void initApiKey() {
     std::ifstream apiTxt("utils/api.txt");
     getline(apiTxt, API_KEY);
     apiTxt.close();
+}
+
+std::string getSessionID() {
+    std::ifstream sessionFile("helpers/session.txt");
+    std::string line;
+    getline(sessionFile, line);
+    sessionFile.close();
+    return line;
+}
+
+void updateNumberList(const firebase::database::DataSnapshot &snapshot) {
+    logger << "-------------- UPDATING CAR LIST --------------" >> false;
+    numberPlates.clear();
+    long long count = 0;
+    for (const auto &child : snapshot.children()) {
+        if (child.Child(CAR_STATUS).value().mutable_string() == ENTERED) {
+            count++;
+            CarUser car;
+            car.carNumber = child.Child(NUMBER_PLATE).value().mutable_string();
+            car.user_uid = child.key_string();
+            car.enteredTime = (long long) child.Child(ENTERED_TIME).value().int64_value();
+
+            logger << count << ": number = " << car.carNumber >> false;
+            logger << "uid = " << car.user_uid >> false;
+            logger << "enter time = " << car.enteredTime >> false;
+
+            numberPlates.push_back(car);
+            logger << "Pushed: " << car.carNumber >> false;
+        }
+    }
+    logger << "-------------------------------------------" >> false;
+}
+
+double getPayment(long long timeElapsed) {
+    double payment = 0.0;
+    logger << "Payment: sec = " << timeElapsed >> false;
+    timeElapsed = timeElapsed / 60;
+    logger << "Payment: min = " << timeElapsed >> false;
+    if (timeElapsed >= 60) {
+        long long multiple = timeElapsed / 60;
+        payment += PER_HOUR * multiple;
+        timeElapsed -= 60 * multiple;
+    }
+    payment += PER_15_MIN * (double) ((long double) timeElapsed / 15.0);
+    return payment;
 }

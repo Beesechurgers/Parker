@@ -23,5 +23,5 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_subdirectory(firebase_cpp_sdk)
 include_directories(firebase_cpp_sdk/include)
 
-add_executable(Parker main.cpp database_constants.h)
+add_executable(Parker main.cpp database_constants.h log.hpp)
 target_link_libraries(Parker ${OpenCV_LIBS} firebase_auth firebase_database firebase_app pthread)

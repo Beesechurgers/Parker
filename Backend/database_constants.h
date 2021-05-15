@@ -12,7 +12,7 @@
  * copies or substantial portions of the Software.
  */
 
-#define INVALID_STRING "#$@"
+#define INVALID_STRING "#@$"
 
 /*
  * Database
