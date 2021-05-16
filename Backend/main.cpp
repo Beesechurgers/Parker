@@ -16,9 +16,10 @@
 #include <firebase/auth.h>
 #include <firebase/database.h>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <future>
+#include <unistd.h>
 #include "database_constants.h"
 #include "log.hpp"
 
@@ -50,6 +51,9 @@ void updateNumberList(const firebase::database::DataSnapshot &snapshot);
 
 double getPayment(long long timeElapsed);
 
+// ----------------------------------------------------------------------------------------------
+//                                      LISTENERS
+// ----------------------------------------------------------------------------------------------
 class UsersValueListener : public firebase::database::ValueListener {
 public:
     ~UsersValueListener() override = default;
@@ -116,11 +120,36 @@ public:
     }
 };
 
+class ServerValueListener : public firebase::database::ValueListener {
+public:
+    ~ServerValueListener() override = default;
+
+    void OnValueChanged(const firebase::database::DataSnapshot &snapshot) override {
+        try {
+            if (!qrScanned) {
+                cv::destroyAllWindows();
+                qrScanned = true;
+            }
+        } catch (std::exception &e) {
+            logger << "[ServerValueListener] Error: " << e.what() >> true;
+            errorTriggered = true;
+        }
+    }
+
+    void OnCancelled(const firebase::database::Error &error, const char *error_message) override {
+        logger << "[ServerValueListener] DatabaseError: " << error_message >> true;
+    }
+};
+
+// ----------------------------------------------------------------------------------------------
+//                                      MAIN
+// ----------------------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         std::cout << "Invalid arguments\n";
         return 0;
     }
+    system("clear");
 
     initApiKey();
     auto pFirebaseApp = std::unique_ptr<::firebase::App>(::firebase::App::Create());
@@ -130,6 +159,7 @@ int main(int argc, char *argv[]) {
     auto mRootRef = pDatabaseInstance->GetReference();
     mRootRef.Child(USERS).AddValueListener(new UsersValueListener());
     mRootRef.Child(ACTIVE).AddValueListener(new ActiveValueListener());
+    mRootRef.Child("Server").AddValueListener(new ServerValueListener());
 
     try {
         // ----------------------------------------------------------------------------------------------
@@ -197,6 +227,7 @@ int main(int argc, char *argv[]) {
         //                                   PROCESS / TASK (?)
         // ----------------------------------------------------------------------------------------------
         loop:
+        sleep(1);
         if (!loginCompleted) goto loop;
         if (!qrScanned) goto loop;
         cleanData();
@@ -207,7 +238,7 @@ int main(int argc, char *argv[]) {
         } else {
             option = getOption();
         }
-//        system("clear");
+        system("clear");
 
         if (option == '1') {
             logger << "|Option: Enter car|" >> false;
@@ -222,6 +253,7 @@ int main(int argc, char *argv[]) {
                 logger << "License Number: " << plate >> true;
 
                 qrScanned = false;
+                sleep(1);
 
                 logger << "Showing QR Code" >> true;
                 cv::Mat qr = cv::imread("helpers/qrcode.png");
@@ -229,7 +261,8 @@ int main(int argc, char *argv[]) {
                 cv::moveWindow("QrCode", (1980 - 675) / 2, (1080 - 675) / 2);
                 cv::imshow("QrCode", qr);
 
-                cv::waitKey();
+                char c = (char) cv::waitKey();
+                if (c == 27 || c == 'q' || c == 'Q') cv::destroyAllWindows(), qrScanned = true;
             }
             goto loop;
 
@@ -254,16 +287,23 @@ int main(int argc, char *argv[]) {
                     logger << "This car belongs to " << it->user_uid >> false;
 
                     std::map<std::string, firebase::Variant> data, payment;
+                    auto currentTime = std::time(nullptr);
+                    double amount = getPayment(currentTime - it->enteredTime);
+
                     data[CAR_STATUS] = EXITED;
                     data[ENTERED_TIME] = INVALID_TIME;
-                    data[EXITED_TIME] = std::time(nullptr);
+                    data[EXITED_TIME] = currentTime;
 
                     payment[PAYMENT_STATUS] = PAYMENT_PENDING;
-                    payment[PAYMENT_AMOUNT] = getPayment(std::time(nullptr) - it->enteredTime);
+                    payment[PAYMENT_AMOUNT] = amount;
                     data[PAYMENT] = payment;
 
                     pDatabaseInstance->GetReference(ACTIVE).Child(it->user_uid).RemoveValue();
                     pDatabaseInstance->GetReference(USERS).Child(it->user_uid).UpdateChildren(data);
+                    std::stringstream notifyCmd;
+                    notifyCmd << "node FCM/app.js " << it->user_uid << " "
+                              << ((currentTime - it->enteredTime) / 60) << " " << amount;
+                    system(notifyCmd.str().c_str());
                 } else {
                     logger << "Invalid car trying to exit: " << plate >> true;
                 }
@@ -297,7 +337,7 @@ int main(int argc, char *argv[]) {
 //                                      UTILS
 // ----------------------------------------------------------------------------------------------
 int getOption() {
-    std::cout << "Options:\n";
+    std::cout << "\nOptions:\n";
     std::cout << "[1] Car entering\n";
     std::cout << "[2] Car exiting\n";
     std::cout << "[q] Exit\n";
