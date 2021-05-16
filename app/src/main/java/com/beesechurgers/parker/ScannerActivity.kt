@@ -15,6 +15,7 @@
 package com.beesechurgers.parker
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Size
@@ -25,11 +26,15 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.beesechurgers.parker.utils.PrefKeys
-import com.beesechurgers.parker.utils.QRCodeImageAnalyzer
+import com.beesechurgers.parker.appService.NotificationHelper
+import com.beesechurgers.parker.utils.*
 import com.beesechurgers.parker.utils.Utils.isValidCarNumber
-import com.beesechurgers.parker.utils.getString
+import com.beesechurgers.parker.utils.Utils.valueEvenListener
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_scanner.*
 
 class ScannerActivity : AppCompatActivity() {
@@ -42,11 +47,25 @@ class ScannerActivity : AppCompatActivity() {
     private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mUser: FirebaseUser
+    private lateinit var mActiveRef: DatabaseReference
+
     private var isScanning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanner)
+
+        mAuth = FirebaseAuth.getInstance()
+        val user = mAuth.currentUser
+        if (user == null) {
+            Toast.makeText(this, "FATAL: User is null", Toast.LENGTH_SHORT).show()
+            super.onBackPressed()
+        } else {
+            mUser = user
+        }
+        mActiveRef = FirebaseDatabase.getInstance().getReference(DatabaseConstants.ACTIVE)
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -81,6 +100,7 @@ class ScannerActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
+        isScanning = true
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
@@ -91,6 +111,7 @@ class ScannerActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    @SuppressLint("SetTextI18n")
     private fun bindCamera() {
         val preview = Preview.Builder()/*.setTargetAspectRatio(AspectRatio.RATIO_4_3)*/
             .build().also { it.setSurfaceProvider(camera_preview.surfaceProvider) }
@@ -110,25 +131,58 @@ class ScannerActivity : AppCompatActivity() {
 
                                 qr_scan_layout.visibility = View.GONE
                                 if (number.isValidCarNumber() && number == this@ScannerActivity.getString(PrefKeys.CAR_NUMBER)) {
-                                    scanned_data.text = "Car Number: $this"
+                                    scanned_data.text = "Car Number: $number"
                                     scan_process.visibility = View.VISIBLE
                                     re_scan_btn.visibility = View.GONE
 
-                                    // TODO: car entered
+                                    isScanning = false
+                                    startSession(session)
                                 } else {
                                     scan_error_layout.visibility = View.VISIBLE
                                     re_scan_btn.visibility = View.VISIBLE
+                                    isScanning = false
                                 }
                             }
                         } else {
                             qr_scan_layout.visibility = View.GONE
                             scan_error_layout.visibility = View.VISIBLE
                             re_scan_btn.visibility = View.VISIBLE
+                            isScanning = false
                         }
                     })
             }
 
         cameraProvider?.unbindAll()
         cameraProvider?.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, imageAnalysis, preview, imageCapture)
+    }
+
+    private fun startSession(session: String) {
+        FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(mUser.uid).valueEvenListener(onDataChange = {
+            val status = it.child(DatabaseConstants.CAR_STATUS).value
+            if (status != null) {
+                if (status.toString() == DatabaseConstants.EXITED) {
+                    mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
+                        this[DatabaseConstants.SESSION] = session
+                    }).addOnCompleteListener {
+                        with(NotificationHelper(this)) {
+                            this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionStartedNotification())
+                        }
+                        super.onBackPressed()
+                    }
+                } else {
+                    qr_scan_layout.visibility = View.GONE
+                    scan_process.visibility = View.GONE
+                    scan_error_layout.visibility = View.VISIBLE
+                    re_scan_btn.visibility = View.GONE
+
+                    scan_error_text.text = getString(R.string.car_already_entered_error)
+                    sendCancelSessionNotification()
+                }
+            }
+        })
+    }
+
+    private fun sendCancelSessionNotification() {
+        FirebaseDatabase.getInstance().getReference("Server").child("Cancel").setValue(System.currentTimeMillis())
     }
 }

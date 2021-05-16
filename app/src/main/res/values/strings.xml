@@ -31,4 +31,5 @@
     <string name="qr_scan_description">Scan the QR Code shown on the panel</string>
     <string name="parking_area">Parking Area</string>
     <string name="processing">Processing …</string>
+    <string name="car_already_entered_error">This car number has already entered some other parking lot</string>
 </resources>
