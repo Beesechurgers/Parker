@@ -33,10 +33,6 @@ object DatabaseConstants {
     const val PAYMENT_PENDING = "pending"
     const val PAYMENT_AMOUNT = "amount"
 
-    // Rupees
-    const val PER_HOUR = 50
-    const val PER_15_MIN = 10
-
     const val LAST_LOCATION = "last_location"
     const val LAT = "latitude"
     const val LONG = "longitude"
@@ -45,4 +41,6 @@ object DatabaseConstants {
     const val ACTIVE = "Active"
     const val SESSION = "session_id"
     const val INVALID_SESSION = "__null__"
+
+    const val HISTORY = "History"
 }
