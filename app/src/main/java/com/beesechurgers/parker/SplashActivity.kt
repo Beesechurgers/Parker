@@ -22,6 +22,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.beesechurgers.parker.utils.*
+import com.beesechurgers.parker.utils.Utils.isNetworkConnected
 import com.beesechurgers.parker.utils.Utils.isValidCarNumber
 import com.beesechurgers.parker.utils.Utils.valueEvenListener
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -63,6 +64,11 @@ class SplashActivity : AppCompatActivity() {
         }
 
         sign_in_google.setOnClickListener {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             sign_in_google.visibility = View.GONE
             login_progress.visibility = View.VISIBLE
 
@@ -117,6 +123,11 @@ class SplashActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're offline", Toast.LENGTH_SHORT).show()
+                return
+            }
+
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)

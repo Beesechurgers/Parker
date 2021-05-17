@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.beesechurgers.parker.utils.DatabaseConstants
 import com.beesechurgers.parker.utils.PrefKeys
 import com.beesechurgers.parker.utils.Utils
+import com.beesechurgers.parker.utils.Utils.isNetworkConnected
 import com.beesechurgers.parker.utils.Utils.valueEvenListener
 import com.beesechurgers.parker.utils.putString
 import com.google.firebase.auth.FirebaseAuth
@@ -52,13 +53,22 @@ class CarNumberActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             reg_btn.visibility = View.GONE
             reg_progress.visibility = View.VISIBLE
-
             handlerCarNumber(number, rootRef, user)
         }
 
         reg_logout_btn.setOnClickListener {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             auth.signOut()
             Utils.clearUserData(this)
             startActivity(Intent(this, SplashActivity::class.java)

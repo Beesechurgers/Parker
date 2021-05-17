@@ -1,4 +1,3 @@
-
 package com.beesechurgers.parker.utils;
 
 import android.graphics.ImageFormat;

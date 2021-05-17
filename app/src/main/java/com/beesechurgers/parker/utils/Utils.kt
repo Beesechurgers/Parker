@@ -15,6 +15,8 @@
 package com.beesechurgers.parker.utils
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.appcompat.widget.AppCompatEditText
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -62,5 +64,17 @@ object Utils {
 
             override fun onCancelled(error: DatabaseError) = onCancelled(error)
         })
+    }
+
+    fun Context.isNetworkConnected(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = cm.activeNetwork
+        activeNetwork ?: return false
+
+        val capabilities = cm.getNetworkCapabilities(activeNetwork)
+        capabilities ?: return false
+
+        return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
 }

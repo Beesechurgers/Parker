@@ -17,9 +17,11 @@ package com.beesechurgers.parker
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.beesechurgers.parker.utils.PrefKeys
 import com.beesechurgers.parker.utils.Utils
+import com.beesechurgers.parker.utils.Utils.isNetworkConnected
 import com.beesechurgers.parker.utils.getString
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Callback
@@ -45,9 +47,21 @@ class MainActivity : AppCompatActivity() {
                 })
         }
 
-        scanner_fab.setOnClickListener { startActivity(Intent(this, ScannerActivity::class.java)) }
+        scanner_fab.setOnClickListener {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            startActivity(Intent(this, ScannerActivity::class.java))
+        }
 
         logout.setOnClickListener {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             FirebaseAuth.getInstance().signOut()
             Utils.clearUserData(this)
             startActivity(Intent(this, SplashActivity::class.java)

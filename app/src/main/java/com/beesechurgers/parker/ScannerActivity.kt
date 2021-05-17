@@ -28,6 +28,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.beesechurgers.parker.appService.NotificationHelper
 import com.beesechurgers.parker.utils.*
+import com.beesechurgers.parker.utils.Utils.isNetworkConnected
 import com.beesechurgers.parker.utils.Utils.isValidCarNumber
 import com.beesechurgers.parker.utils.Utils.valueEvenListener
 import com.google.common.util.concurrent.ListenableFuture
@@ -122,6 +123,11 @@ class ScannerActivity : AppCompatActivity() {
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build().apply {
                 this.setAnalyzer(ContextCompat.getMainExecutor(this@ScannerActivity),
                     QRCodeImageAnalyzer { data ->
+                        if (!isNetworkConnected()) {
+                            Toast.makeText(this@ScannerActivity, "You're Offline", Toast.LENGTH_SHORT).show()
+                            return@QRCodeImageAnalyzer
+                        }
+
                         cameraProvider?.unbindAll()
 
                         if (data.contains("/")) {
@@ -179,7 +185,6 @@ class ScannerActivity : AppCompatActivity() {
                         re_scan_btn.visibility = View.GONE
 
                         scan_error_text.text = getString(R.string.payment_pending_error)
-                        sendCancelSessionNotification()
                     }
                 } else {
                     qr_scan_layout.visibility = View.GONE
