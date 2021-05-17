@@ -16,7 +16,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkerApp">
-        <activity android:name=".PaymentActivity"></activity>
+        <activity android:name=".HistoryActivity"></activity>
+        <activity android:name=".PaymentActivity" />
         <activity android:name=".ScannerActivity" />
         <activity
             android:name=".CarNumberActivity"
