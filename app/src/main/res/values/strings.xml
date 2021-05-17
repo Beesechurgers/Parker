@@ -33,4 +33,9 @@
     <string name="processing">Processing …</string>
     <string name="car_already_entered_error">This car number has already entered some other parking lot</string>
     <string name="payment_pending_error">Payment from previous parking isn\'t completed</string>
+    <string name="payment">Payment</string>
+    <string name="amount">Amount</string>
+    <string name="amount">Amount</string>
+    <string name="time_elapsed">Time elapsed:60 mins</string>
+    <string name="pay_now">Pay Now</string>
 </resources>
