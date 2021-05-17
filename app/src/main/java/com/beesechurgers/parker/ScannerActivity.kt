@@ -159,15 +159,27 @@ class ScannerActivity : AppCompatActivity() {
     private fun startSession(session: String) {
         FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(mUser.uid).valueEvenListener(onDataChange = {
             val status = it.child(DatabaseConstants.CAR_STATUS).value
-            if (status != null) {
+            val paymentStatus = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_STATUS).value
+
+            if (status != null && paymentStatus != null) {
                 if (status.toString() == DatabaseConstants.EXITED) {
-                    mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
-                        this[DatabaseConstants.SESSION] = session
-                    }).addOnCompleteListener {
-                        with(NotificationHelper(this)) {
-                            this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionStartedNotification())
+                    if (paymentStatus.toString() != DatabaseConstants.PAYMENT_PENDING) {
+                        mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
+                            this[DatabaseConstants.SESSION] = session
+                        }).addOnCompleteListener {
+                            with(NotificationHelper(this)) {
+                                this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionStartedNotification())
+                            }
+                            super.onBackPressed()
                         }
-                        super.onBackPressed()
+                    } else {
+                        qr_scan_layout.visibility = View.GONE
+                        scan_process.visibility = View.GONE
+                        scan_error_layout.visibility = View.VISIBLE
+                        re_scan_btn.visibility = View.GONE
+
+                        scan_error_text.text = getString(R.string.payment_pending_error)
+                        sendCancelSessionNotification()
                     }
                 } else {
                     qr_scan_layout.visibility = View.GONE
