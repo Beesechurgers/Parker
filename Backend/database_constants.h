@@ -84,13 +84,6 @@
 #define PER_HOUR 50     // Rupees
 #define PER_15_MIN 10   // Rupees
 
-#define LAST_LOCATION "last_location"
-#define LAT "latitude"
-#define LONG "longitude"
-#define INVALID_LOCATION 0.0
-
 #define ACTIVE "Active"
 #define SESSION "session_id"
 #define INVALID_SESSION "__null__"
-
-#define HISTORY "History"

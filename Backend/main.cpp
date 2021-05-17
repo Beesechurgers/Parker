@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
                                         snapshot.error() == firebase::database::kErrorNone) {
 
                                         if (!snapshot.result()->HasChild(user->uid())) {
-                                            std::map<std::string, firebase::Variant> data, location, payment;
+                                            std::map<std::string, firebase::Variant> data, payment;
                                             data[NUMBER_PLATE] = "xyz-xyz-xyz";
                                             data[CAR_STATUS] = EXITED;
                                             data[ENTERED_TIME] = INVALID_TIME;
@@ -188,10 +188,6 @@ int main(int argc, char *argv[]) {
                                             payment[PAYMENT_STATUS] = PAYMENT_COMPLETED;
                                             payment[PAYMENT_AMOUNT] = 0;
                                             data[PAYMENT] = payment;
-
-                                            location[LAT] = INVALID_LOCATION;
-                                            location[LONG] = INVALID_LOCATION;
-                                            data[LAST_LOCATION] = location;
 
                                             pDatabaseInstance->GetReference(USERS).Child(user->uid())
                                                     .UpdateChildren(data).OnCompletion([](const auto &res) {
@@ -286,7 +282,6 @@ int main(int argc, char *argv[]) {
                         double amount = getPayment(currentTime - it->enteredTime);
 
                         data[CAR_STATUS] = EXITED;
-                        data[ENTERED_TIME] = INVALID_TIME;
                         data[EXITED_TIME] = currentTime;
 
                         payment[PAYMENT_STATUS] = PAYMENT_PENDING;
