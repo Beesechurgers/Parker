@@ -61,7 +61,7 @@ public:
     void OnValueChanged(const firebase::database::DataSnapshot &snapshot) override {
         try {
             if (qrScanned) {
-                std::async(std::launch::async, updateNumberList, snapshot).wait();
+                std::async(std::launch::async, updateNumberList, snapshot);
             }
         } catch (std::exception &e) {
             logger << "[UsersValueListener] Error: " << e.what() >> true;
@@ -106,7 +106,7 @@ public:
 
                         pDatabaseInstance->GetReference(USERS).Child(user_uid).UpdateChildren(data);
                     }
-                }).wait();
+                });
                 qrScanned = true;
             }
         } catch (std::exception &e) {
@@ -127,6 +127,7 @@ public:
     void OnValueChanged(const firebase::database::DataSnapshot &snapshot) override {
         try {
             if (!qrScanned) {
+                logger << "Cancel session called" >> false;
                 cv::destroyAllWindows();
                 qrScanned = true;
             }
@@ -226,93 +227,88 @@ int main(int argc, char *argv[]) {
         // ----------------------------------------------------------------------------------------------
         //                                   PROCESS / TASK (?)
         // ----------------------------------------------------------------------------------------------
-        loop:
-        sleep(1);
-        if (!loginCompleted) goto loop;
-        if (!qrScanned) goto loop;
-        cleanData();
-
-        int option;
-        if (errorTriggered) {
-            option = 'q';
-        } else {
-            option = getOption();
-        }
-        system("clear");
-
-        if (option == '1') {
-            logger << "|Option: Enter car|" >> false;
-            int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 1")[0]);
-            if (completed == 0) {
-                logger << "Task completed" >> true;
-                std::string plate = getNumberPlate();
-                if (plate == "None") {
-                    logger << "Invalid License Number" >> true;
-                    goto loop;
-                }
-                logger << "License Number: " << plate >> true;
-
-                qrScanned = false;
-                sleep(1);
-
-                logger << "Showing QR Code" >> true;
-                cv::Mat qr = cv::imread("helpers/qrcode.png");
-                cv::namedWindow("QrCode");
-                cv::moveWindow("QrCode", (1980 - 675) / 2, (1080 - 675) / 2);
-                cv::imshow("QrCode", qr);
-
-                char c = (char) cv::waitKey();
-                if (c == 27 || c == 'q' || c == 'Q') cv::destroyAllWindows(), qrScanned = true;
-            }
-            goto loop;
-
-        } else if (option == '2') {
-            logger << "|Option: Exit car|" >> false;
-            int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 2")[0]);
-            if (completed == 0) {
-                logger << "Task completed" >> true;
-                std::string plate = getNumberPlate();
-                if (plate == "None") {
-                    logger << "Invalid License Number: " << plate >> true;
-                    goto loop;
-                }
-                logger << "License Number: " << plate >> true;
-
-                auto it = std::find_if(numberPlates.begin(), numberPlates.end(),
-                                       [&number = plate](const CarUser &c) -> bool {
-                                           return c.carNumber == number;
-                                       });
-                if (it != numberPlates.end()) {
-                    logger << "Valid car exited" >> true;
-                    logger << "This car belongs to " << it->user_uid >> false;
-
-                    std::map<std::string, firebase::Variant> data, payment;
-                    auto currentTime = std::time(nullptr);
-                    double amount = getPayment(currentTime - it->enteredTime);
-
-                    data[CAR_STATUS] = EXITED;
-                    data[ENTERED_TIME] = INVALID_TIME;
-                    data[EXITED_TIME] = currentTime;
-
-                    payment[PAYMENT_STATUS] = PAYMENT_PENDING;
-                    payment[PAYMENT_AMOUNT] = amount;
-                    data[PAYMENT] = payment;
-
-                    pDatabaseInstance->GetReference(ACTIVE).Child(it->user_uid).RemoveValue();
-                    pDatabaseInstance->GetReference(USERS).Child(it->user_uid).UpdateChildren(data);
-                    std::stringstream notifyCmd;
-                    notifyCmd << "node FCM/app.js " << it->user_uid << " "
-                              << ((currentTime - it->enteredTime) / 60) << " " << amount;
-                    system(notifyCmd.str().c_str());
-                } else {
-                    logger << "Invalid car trying to exit: " << plate >> true;
-                }
-            }
-            qrScanned = true;
-            goto loop;
-
-        } else {
+        for (;;) {
+            sleep(1);
+            if (!loginCompleted) continue;
+            if (!qrScanned) continue;
             cleanData();
+
+            int option = errorTriggered ? 'q' : getOption();
+            system("clear");
+
+            if (option == '1') {
+                logger << "|Option: Enter car|" >> false;
+                int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 1")[0]);
+                if (completed == 0) {
+                    logger << "Task completed" >> true;
+                    std::string plate = getNumberPlate();
+                    if (plate == "None") {
+                        logger << "Invalid License Number" >> true;
+                        continue;
+                    }
+                    logger << "License Number: " << plate >> true;
+
+                    qrScanned = false;
+                    sleep(1);
+
+                    logger << "Showing QR Code" >> true;
+                    cv::Mat qr = cv::imread("helpers/qrcode.png");
+                    cv::namedWindow("QrCode");
+                    cv::moveWindow("QrCode", (1980 - 675) / 2, (1080 - 675) / 2);
+                    cv::imshow("QrCode", qr);
+
+                    char c = (char) cv::waitKey();
+                    if (c == 27 || c == 'q' || c == 'Q') cv::destroyAllWindows(), qrScanned = true;
+                }
+
+            } else if (option == '2') {
+                logger << "|Option: Exit car|" >> false;
+                int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 2")[0]);
+                if (completed == 0) {
+                    logger << "Task completed" >> true;
+                    std::string plate = getNumberPlate();
+                    if (plate == "None") {
+                        logger << "Invalid License Number: " << plate >> true;
+                        continue;
+                    }
+                    logger << "License Number: " << plate >> true;
+
+                    auto it = std::find_if(numberPlates.begin(), numberPlates.end(),
+                                           [&number = plate](const CarUser &c) -> bool {
+                                               return c.carNumber == number;
+                                           });
+                    if (it != numberPlates.end()) {
+                        logger << "Valid car exited" >> true;
+                        logger << "This car belongs to " << it->user_uid >> false;
+
+                        std::map<std::string, firebase::Variant> data, payment;
+                        auto currentTime = std::time(nullptr);
+                        double amount = getPayment(currentTime - it->enteredTime);
+
+                        data[CAR_STATUS] = EXITED;
+                        data[ENTERED_TIME] = INVALID_TIME;
+                        data[EXITED_TIME] = currentTime;
+
+                        payment[PAYMENT_STATUS] = PAYMENT_PENDING;
+                        payment[PAYMENT_AMOUNT] = amount;
+                        data[PAYMENT] = payment;
+
+                        pDatabaseInstance->GetReference(ACTIVE).Child(it->user_uid).RemoveValue();
+                        pDatabaseInstance->GetReference(USERS).Child(it->user_uid).UpdateChildren(data);
+                        std::stringstream notifyCmd;
+                        notifyCmd << "node FCM/app.js " << it->user_uid << " "
+                                  << ((currentTime - it->enteredTime) / 60) << " " << amount;
+                        system(notifyCmd.str().c_str());
+                    } else {
+                        logger << "Invalid car trying to exit: " << plate >> true;
+                    }
+                }
+                qrScanned = true;
+
+            } else {
+                cleanData();
+                break;
+            }
         }
     } catch (std::exception &e) {
         logger << "FATAL: " << e.what() >> true;
@@ -334,7 +330,7 @@ int main(int argc, char *argv[]) {
 }
 
 // ----------------------------------------------------------------------------------------------
-//                                      UTILS
+//                                      FUNCTIONS
 // ----------------------------------------------------------------------------------------------
 int getOption() {
     std::cout << "\nOptions:\n";
