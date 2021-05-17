@@ -98,14 +98,10 @@ class SplashActivity : AppCompatActivity() {
                         this[DatabaseConstants.CAR_STATUS] = DatabaseConstants.EXITED
                         this[DatabaseConstants.ENTERED_TIME] = DatabaseConstants.INVALID_TIME
                         this[DatabaseConstants.EXITED_TIME] = DatabaseConstants.INVALID_TIME
+
                         this[DatabaseConstants.PAYMENT] = HashMap<String, Any>().apply {
                             this[DatabaseConstants.PAYMENT_AMOUNT] = 0.0
                             this[DatabaseConstants.PAYMENT_STATUS] = DatabaseConstants.PAYMENT_COMPLETED
-                        }
-
-                        this[DatabaseConstants.LAST_LOCATION] = HashMap<String, Any>().apply {
-                            this[DatabaseConstants.LAT] = DatabaseConstants.INVALID_LOCATION
-                            this[DatabaseConstants.LONG] = DatabaseConstants.INVALID_LOCATION
                         }
                     }
                 ).addOnCompleteListener {
