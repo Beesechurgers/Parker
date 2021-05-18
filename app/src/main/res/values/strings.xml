@@ -39,4 +39,12 @@
     <string name="pay_now">Pay Now</string>
     <string name="payment_car_number">Car Number: %s</string>
     <string name="payment_amount">\u20B9 %s</string>
+    <string name="live_session_time_elapsed">%s min(s)</string>
+    <string name="ongoing_session">Ongoing Session</string>
+    <string name="pending_payment">Pending Payment</string>
+    <string name="payment_methods">Selected Payment Method</string>
+    <string name="paypal">Paypal</string>
+    <string name="change">Change</string>
+    <string name="history">History</string>
+    <string name="history_description">View your payment history</string>
 </resources>

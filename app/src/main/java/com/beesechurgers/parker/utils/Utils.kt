@@ -55,6 +55,14 @@ object Utils {
 
     fun String.isValidCarNumber() = Pattern.matches("[A-Z]{2}[0-9]{1,2}(?:[A-Z])?(?:[A-Z]*)?[0-9]{4}", this)
 
+    fun String.formatAmount(): String {
+        return if (this.contains('.')) {
+            if (this.split('.')[1].length > 2) {
+                this.substring(IntRange(0, this.indexOf('.') + 2))
+            } else this
+        } else "$this.00"
+    }
+
     fun DatabaseReference.valueEvenListener(onDataChange: (snapshot: DataSnapshot) -> Unit, onCancelled: (error: DatabaseError) -> Unit = {}) {
         this.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

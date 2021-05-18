@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import com.beesechurgers.parker.PaymentActivity
 import com.beesechurgers.parker.R
 import com.beesechurgers.parker.utils.Utils
+import com.beesechurgers.parker.utils.Utils.formatAmount
 
 class NotificationHelper(context: Context) : ContextWrapper(context) {
 
@@ -74,7 +75,7 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
 
     fun getSessionCompletedNotification(min: String?, amount: String?): Notification {
         val title = "Car Exited"
-        val finalAmount = amount?.substring(IntRange(0, amount.indexOf('.') + 2))
+        val finalAmount = amount?.formatAmount()
         val content = "You have exited the parking.\n\nTime Elapsed: $min min(s)\n" +
             "Amount: \u20B9 $finalAmount"
         val pendingIntent = PendingIntent.getActivity(this, 0,

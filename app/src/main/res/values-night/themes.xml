@@ -20,8 +20,8 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:fontFamily">@font/google_sans</item>
         <item name="android:windowContentTransitions">true</item>
-        <item name="android:navigationBarColor">@color/app_bar_bg</item>
-        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">@color/app_bar_bg
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">@color/colorPrimary
         </item>
     </style>
 </resources>

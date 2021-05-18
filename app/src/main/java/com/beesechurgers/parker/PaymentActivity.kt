@@ -24,6 +24,7 @@ import com.beesechurgers.parker.utils.DatabaseConstants
 import com.beesechurgers.parker.utils.PrefKeys
 import com.beesechurgers.parker.utils.Utils
 import com.beesechurgers.parker.utils.Utils.checkNull
+import com.beesechurgers.parker.utils.Utils.formatAmount
 import com.beesechurgers.parker.utils.Utils.isNetworkConnected
 import com.beesechurgers.parker.utils.Utils.valueEvenListener
 import com.beesechurgers.parker.utils.getString
@@ -81,7 +82,7 @@ class PaymentActivity : AppCompatActivity() {
                 if (paymentStatus == DatabaseConstants.PAYMENT_COMPLETED) return@checkNull
 
                 val min = (exit.toLong() - enter.toLong()) / 60
-                val amount = paymentAmount.substring(IntRange(0, paymentAmount.indexOf('.') + 2))
+                val amount = paymentAmount.formatAmount()
 
                 payment_amount.text = getString(R.string.payment_amount, amount)
                 payment_time_elapsed.text = getString(R.string.payment_time_elapsed, min.toString())

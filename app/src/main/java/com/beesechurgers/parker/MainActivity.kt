@@ -17,13 +17,20 @@ package com.beesechurgers.parker
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.beesechurgers.parker.utils.DatabaseConstants
 import com.beesechurgers.parker.utils.PrefKeys
 import com.beesechurgers.parker.utils.Utils
+import com.beesechurgers.parker.utils.Utils.formatAmount
 import com.beesechurgers.parker.utils.Utils.isNetworkConnected
+import com.beesechurgers.parker.utils.Utils.valueEvenListener
 import com.beesechurgers.parker.utils.getString
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.squareup.picasso.Callback
 import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
@@ -31,9 +38,22 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mUserRef: DatabaseReference
+    private var mUser: FirebaseUser? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        mAuth = FirebaseAuth.getInstance()
+        mUser = mAuth.currentUser
+        if (mUser == null) {
+            Toast.makeText(this, "FATAL: User NULL", Toast.LENGTH_SHORT).show()
+            super.onBackPressed()
+            return
+        }
+        mUserRef = FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(mUser!!.uid)
 
         val url = getString(PrefKeys.USER_PHOTO)
         if (url != Utils.INVALID_STRING) {
@@ -56,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, ScannerActivity::class.java))
         }
 
-        logout.setOnClickListener {
+        logout_fab.setOnClickListener {
             if (!isNetworkConnected()) {
                 Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -67,6 +87,60 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SplashActivity::class.java)
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
         }
+
+        change_payment_method.setOnClickListener { Toast.makeText(this, "Dummy Payment", Toast.LENGTH_SHORT).show() }
+        payment_history_card.setOnClickListener { startActivity(Intent(this, HistoryActivity::class.java)) }
+
+        refreshStatus()
+    }
+
+    private fun refreshStatus() {
+        mUserRef.valueEvenListener(onDataChange = {
+            val carStatus = it.child(DatabaseConstants.CAR_STATUS).value.toString()
+            if (carStatus == DatabaseConstants.ENTERED) {
+
+                // Ongoing Session
+                val timeElapsed = ((System.currentTimeMillis() / 1000) - it.child(DatabaseConstants.ENTERED_TIME).value.toString().toLong()) / 60
+                live_session_time.text = getString(R.string.live_session_time_elapsed, timeElapsed.toString())
+                live_session_car_number.text = getString(PrefKeys.CAR_NUMBER)
+
+                val amount = getEstimatedAmount(timeElapsed).toString()
+                live_payment_amount.text = getString(R.string.payment_amount, amount.formatAmount())
+
+                live_session_card.visibility = View.VISIBLE
+            }
+
+            val paymentStatus = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_STATUS).value.toString()
+            if (paymentStatus == DatabaseConstants.PAYMENT_PENDING) {
+                val amount = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_AMOUNT).value.toString()
+                pending_payment_amount.text = getString(R.string.payment_amount, amount.formatAmount())
+                pending_pay_now.setOnClickListener {
+                    if (!isNetworkConnected()) {
+                        Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                    startActivity(Intent(this, PaymentActivity::class.java))
+                }
+                pending_payment_card.visibility = View.VISIBLE
+            }
+        })
+    }
+
+    private fun getEstimatedAmount(timeElapsed: Long): Double {
+        var payment: Double = 0.0
+        var time = timeElapsed
+        if (time >= 60) {
+            val multiple = time / 60
+            payment += 50.0 * multiple
+            time -= 60 * multiple
+        }
+        payment += 10.0 * time / 15.0
+        return payment
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshStatus()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
