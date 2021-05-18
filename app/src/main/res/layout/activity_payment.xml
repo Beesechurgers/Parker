@@ -34,8 +34,7 @@
         android:id="@+id/payment_loading_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:id="@+id/payment_layout"
@@ -43,7 +42,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:visibility="gone">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
