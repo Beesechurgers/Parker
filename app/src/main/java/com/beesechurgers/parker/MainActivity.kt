@@ -89,7 +89,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         change_payment_method.setOnClickListener { Toast.makeText(this, "Dummy Payment", Toast.LENGTH_SHORT).show() }
-        payment_history_card.setOnClickListener { startActivity(Intent(this, HistoryActivity::class.java)) }
+        payment_history_card.setOnClickListener {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
 
         refreshStatus()
     }

@@ -47,4 +47,6 @@
     <string name="change">Change</string>
     <string name="history">History</string>
     <string name="history_description">View your payment history</string>
+    <string name="payment_history">Payment History</string>
+    <string name="payment_history_amount">Amount: \u20B9 %s</string>
 </resources>

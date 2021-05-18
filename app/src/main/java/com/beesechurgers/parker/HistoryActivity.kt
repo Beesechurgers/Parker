@@ -14,12 +14,52 @@
 package com.beesechurgers.parker
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.beesechurgers.parker.utils.DatabaseConstants
+import com.beesechurgers.parker.utils.PayHistoryAdapter
+import com.beesechurgers.parker.utils.Utils.valueEvenListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_history.*
 
 class HistoryActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "HistoryActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            Toast.makeText(this, "FATAL: User NULL", Toast.LENGTH_SHORT).show()
+            super.onBackPressed()
+            return
+        }
+
+        payment_history_view.setHasFixedSize(true)
+        payment_history_view.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+
+        initList(user.uid)
+    }
+
+    private fun initList(uid: String) {
+        FirebaseDatabase.getInstance().getReference(DatabaseConstants.HISTORY).child(uid).valueEvenListener(onDataChange = {
+            val list = ArrayList<PayHistoryAdapter.PaymentHistoryItem>()
+            for (child in it.children) {
+                list.add(PayHistoryAdapter.PaymentHistoryItem(child.key.toString().toLong(),
+                    child.child(DatabaseConstants.EXITED_TIME).value.toString().toLong(),
+                    child.child(DatabaseConstants.ENTERED_TIME).value.toString().toLong(),
+                    child.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_AMOUNT).value.toString()))
+            }
+
+            payment_history_view.adapter = null
+            payment_history_view.adapter = PayHistoryAdapter(list)
+        })
     }
 }
