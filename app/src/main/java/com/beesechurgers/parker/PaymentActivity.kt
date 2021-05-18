@@ -97,19 +97,37 @@ class PaymentActivity : AppCompatActivity() {
         complete_payment.visibility = View.GONE
         pay_ongoing_progress.visibility = View.VISIBLE
 
-        FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(uid).updateChildren(HashMap<String, Any>().apply {
-            this[DatabaseConstants.ENTERED_TIME] = DatabaseConstants.INVALID_TIME
-            this[DatabaseConstants.EXITED_TIME] = DatabaseConstants.INVALID_TIME
+        val userRef = FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(uid)
+        val currentTime = System.currentTimeMillis() / 1000
 
-            this[DatabaseConstants.PAYMENT] = HashMap<String, Any>().apply {
-                this[DatabaseConstants.PAYMENT_AMOUNT] = 0.0
-                this[DatabaseConstants.PAYMENT_STATUS] = DatabaseConstants.PAYMENT_COMPLETED
-            }
-        }).addOnCompleteListener {
-            Toast.makeText(this, "Payment Successful", Toast.LENGTH_SHORT).show()
-            NotificationHelper(this).getManager().cancel(NotificationHelper.NOTIFICATION_ID)
-            startActivity(Intent(this, MainActivity::class.java)
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
-        }
+        userRef.valueEvenListener(onDataChange = {
+            // Update / Add history
+            FirebaseDatabase.getInstance().getReference(DatabaseConstants.HISTORY).child(uid).child(currentTime.toString())
+                .updateChildren(HashMap<String, Any>().apply {
+                    this[DatabaseConstants.ENTERED_TIME] = it.child(DatabaseConstants.ENTERED_TIME).value.toString().toLong()
+                    this[DatabaseConstants.EXITED_TIME] = it.child(DatabaseConstants.EXITED_TIME).value.toString().toLong()
+
+                    this[DatabaseConstants.PAYMENT] = HashMap<String, Any>().apply {
+                        this[DatabaseConstants.PAYMENT_AMOUNT] = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_AMOUNT).value.toString().toDouble()
+                        this[DatabaseConstants.PAYMENT_STATUS] = DatabaseConstants.PAYMENT_COMPLETED
+                    }
+                }).addOnCompleteListener {
+                    // Complete payment
+                    userRef.updateChildren(HashMap<String, Any>().apply {
+                        this[DatabaseConstants.ENTERED_TIME] = DatabaseConstants.INVALID_TIME
+                        this[DatabaseConstants.EXITED_TIME] = DatabaseConstants.INVALID_TIME
+
+                        this[DatabaseConstants.PAYMENT] = HashMap<String, Any>().apply {
+                            this[DatabaseConstants.PAYMENT_AMOUNT] = 0.0
+                            this[DatabaseConstants.PAYMENT_STATUS] = DatabaseConstants.PAYMENT_COMPLETED
+                        }
+                    }).addOnCompleteListener {
+                        Toast.makeText(this, "Payment Successful", Toast.LENGTH_SHORT).show()
+                        NotificationHelper(this).getManager().cancel(NotificationHelper.NOTIFICATION_ID)
+                        startActivity(Intent(this, MainActivity::class.java)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+                    }
+                }
+        })
     }
 }
