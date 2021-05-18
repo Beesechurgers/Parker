@@ -77,4 +77,8 @@ object Utils {
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
+
+    inline fun <T : Any> checkNull(vararg elements: T?, then: (List<T>) -> Unit) {
+        if (elements.all { it != null && it != "null" }) then(elements.filterNotNull())
+    }
 }

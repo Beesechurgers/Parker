@@ -17,14 +17,18 @@ package com.beesechurgers.parker.appService
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.beesechurgers.parker.PaymentActivity
 import com.beesechurgers.parker.R
+import com.beesechurgers.parker.utils.Utils
 
 class NotificationHelper(context: Context) : ContextWrapper(context) {
 
@@ -68,22 +72,36 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             .build()
     }
 
-    fun getSessionCompletedNotification(content: String): Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-            .setContentTitle("Car Exited")
-            .setContentText("You have exited the parking.\n\n$content")
-            .setStyle(NotificationCompat.BigTextStyle())
-            .setColorized(true)
-            .setSmallIcon(R.drawable.ic_round_local_parking_24)
-            .setColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
-            .build()
-    } else {
-        Notification.Builder(applicationContext)
-            .setContentTitle("Car Exited")
-            .setContentText("You have exited the parking.\n\n$content")
-            .setStyle(Notification.BigTextStyle())
-            .setSmallIcon(R.drawable.ic_round_local_parking_24)
-            .setColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
-            .build()
+    fun getSessionCompletedNotification(min: String?, amount: String?): Notification {
+        val title = "Car Exited"
+        val finalAmount = amount?.substring(IntRange(0, amount.indexOf('.') + 2))
+        val content = "You have exited the parking.\n\nTime Elapsed: $min min(s)\n" +
+            "Amount: \u20B9 $finalAmount"
+        val pendingIntent = PendingIntent.getActivity(this, 0,
+            Intent(this, PaymentActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra("min", min ?: Utils.INVALID_STRING)
+                .putExtra("amount", finalAmount ?: Utils.INVALID_STRING),
+            PendingIntent.FLAG_UPDATE_CURRENT)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setStyle(NotificationCompat.BigTextStyle())
+                .setColorized(true)
+                .setSmallIcon(R.drawable.ic_round_local_parking_24)
+                .setColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
+                .addAction(R.drawable.ic_baseline_payment_24, "Pay Now", pendingIntent)
+                .build()
+        } else {
+            Notification.Builder(applicationContext)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setStyle(Notification.BigTextStyle())
+                .setSmallIcon(R.drawable.ic_round_local_parking_24)
+                .setColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
+                .addAction(Notification.Action.Builder(R.drawable.ic_baseline_payment_24, "Pay Now", pendingIntent).build())
+                .build()
+        }
     }
 }

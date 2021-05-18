@@ -35,7 +35,8 @@
     <string name="payment_pending_error">Payment from previous parking isn\'t completed</string>
     <string name="payment">Payment</string>
     <string name="amount">Amount</string>
-    <string name="amount">Amount</string>
-    <string name="time_elapsed">Time elapsed:60 mins</string>
+    <string name="payment_time_elapsed">Time elapsed: %s min(s)</string>
     <string name="pay_now">Pay Now</string>
+    <string name="payment_car_number">Car Number: %s</string>
+    <string name="payment_amount">\u20B9 %s</string>
 </resources>

@@ -168,7 +168,7 @@ class ScannerActivity : AppCompatActivity() {
             val paymentStatus = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_STATUS).value
 
             if (status != null && paymentStatus != null) {
-                if (status.toString() == DatabaseConstants.EXITED) {
+                if (status.toString() != DatabaseConstants.ENTERED) {
                     if (paymentStatus.toString() != DatabaseConstants.PAYMENT_PENDING) {
                         mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
                             this[DatabaseConstants.SESSION] = session

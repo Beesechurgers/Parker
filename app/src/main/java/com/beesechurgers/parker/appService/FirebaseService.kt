@@ -36,10 +36,9 @@ class FirebaseService : FirebaseMessagingService() {
         if (user != null) {
             if (remoteMessage.from == "/topics/cheeseCpp" && remoteMessage.data["to"] == user.uid) {
                 val data = remoteMessage.data
-                val content = "Time Elapsed: ${data["min"]} min(s)\nAmount: \u20B9 ${data["amount"]}"
                 with(NotificationHelper(this)) {
                     Log.d(TAG, "onMessageReceived: Notifying user")
-                    this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionCompletedNotification(content))
+                    this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionCompletedNotification(data["min"], data["amount"]))
                 }
             }
         }
