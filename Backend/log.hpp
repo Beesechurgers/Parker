@@ -42,6 +42,11 @@ public:
         return *this;
     }
 
+    Logger &operator<<(double in) {
+        stream << in;
+        return *this;
+    }
+
     void operator>>(bool print) {
         write(print);
     }

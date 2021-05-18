@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
                         data[CAR_STATUS] = EXITED;
                         data[EXITED_TIME] = currentTime;
 
-                        payment[PAYMENT_STATUS] = PAYMENT_PENDING;
+                        payment[PAYMENT_STATUS] = amount == 0 ? PAYMENT_COMPLETED : PAYMENT_PENDING;
                         payment[PAYMENT_AMOUNT] = amount;
                         data[PAYMENT] = payment;
 
@@ -409,5 +409,6 @@ double getPayment(long long timeElapsed) {
         timeElapsed -= 60 * multiple;
     }
     payment += PER_15_MIN * (double) ((long double) timeElapsed / 15.0);
+    logger << "Payment: amount = " << payment >> false;
     return payment;
 }
