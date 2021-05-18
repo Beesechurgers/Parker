@@ -56,9 +56,7 @@ class SplashActivity : AppCompatActivity() {
             .build())
 
         if (mAuth.currentUser != null) {
-            startActivity(Intent(this, if (getString(PrefKeys.CAR_NUMBER).isValidCarNumber()) {
-                MainActivity::class.java
-            } else CarNumberActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+            startActivity(if (getString(PrefKeys.CAR_NUMBER).isValidCarNumber()) MainActivity::class.java else CarNumberActivity::class.java)
         } else {
             login_layout.visibility = View.VISIBLE
         }
@@ -87,11 +85,9 @@ class SplashActivity : AppCompatActivity() {
                     with(it.child(DatabaseConstants.NUMBER_PLATE).value.toString()) {
                         if (this.isValidCarNumber()) {
                             putString(PrefKeys.CAR_NUMBER, this)
-                            startActivity(Intent(this@SplashActivity, MainActivity::class.java)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+                            startActivity(MainActivity::class.java)
                         } else {
-                            startActivity(Intent(this@SplashActivity, CarNumberActivity::class.java)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+                            startActivity(CarNumberActivity::class.java)
                         }
                     }
                 })
@@ -112,8 +108,7 @@ class SplashActivity : AppCompatActivity() {
                     }
                 ).addOnCompleteListener {
                     if (it.isSuccessful) {
-                        startActivity(Intent(this@SplashActivity, CarNumberActivity::class.java)
-                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+                        startActivity(CarNumberActivity::class.java)
                     }
                 }
             }
@@ -162,6 +157,11 @@ class SplashActivity : AppCompatActivity() {
                 login_progress.visibility = View.GONE
             }
         }
+    }
+
+    private fun startActivity(cls: Class<*>) {
+        startActivity(Intent(this, cls).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
