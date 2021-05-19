@@ -102,6 +102,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshStatus() {
         mUserRef.valueEvenListener(onDataChange = {
+            live_session_card.visibility = View.GONE
             val carStatus = it.child(DatabaseConstants.CAR_STATUS).value.toString()
             if (carStatus == DatabaseConstants.ENTERED) {
 
@@ -116,6 +117,7 @@ class MainActivity : AppCompatActivity() {
                 live_session_card.visibility = View.VISIBLE
             }
 
+            pending_payment_card.visibility = View.GONE
             val paymentStatus = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_STATUS).value.toString()
             if (paymentStatus == DatabaseConstants.PAYMENT_PENDING) {
                 val amount = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_AMOUNT).value.toString()
