@@ -14,6 +14,9 @@
 
 #pragma once
 
+/**
+ * Simple logger class to log the running program
+ */
 class Logger {
 public:
 

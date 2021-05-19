@@ -23,11 +23,19 @@ admin.initializeApp({
     databaseURL: "https://parker-649a6-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
+// Args length should be 6:
+// 1. node
+// 2. app.js
+// 3. user_uid
+// 4. time_elapsed
+// 5. amount
+// 6. paymentRequired
 if (process.argv.length !== 6) {
     console.log("Invalid args");
     process.exit(1);
 }
 
+// Send notification
 admin.messaging().send({
     data: {
         to: process.argv[2],

@@ -37,18 +37,47 @@ std::string API_KEY;
 bool loginCompleted = false, qrScanned = true, errorTriggered = false;
 Logger logger;
 
+/**
+ * Ask for user input to whether car should enter, exit, or quit program
+ *
+ * This user input option shall be replaced with proximity sensor signaling the program
+ * to act accordingly
+ */
 int getOption();
 
+/**
+ * Get number plate from the file saved by detector.py
+ */
 std::string getNumberPlate();
 
+/**
+ * Remove / Delete all the data provided by detector.py
+ * - Delete generated QR code
+ * - Remove generated session UUID
+ * - Remove detected license number
+ */
 void cleanData();
 
+/**
+ * Get API key needed in detector.py
+ */
 void initApiKey();
 
+/**
+ * Get session UUID from the file saved by detector.py
+ */
 std::string getSessionID();
 
+/**
+ * A method to be executed asynchronously
+ *
+ * Updates the number plate list with the ones whose car is ENTERED
+ */
 void updateNumberList(const firebase::database::DataSnapshot &snapshot);
 
+/**
+ * Calculate payment from the time elapsed
+ */
 double getPayment(long long timeElapsed);
 
 // ----------------------------------------------------------------------------------------------
