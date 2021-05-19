@@ -284,15 +284,17 @@ int main(int argc, char *argv[]) {
                         data[CAR_STATUS] = EXITED;
                         data[EXITED_TIME] = currentTime;
 
-                        payment[PAYMENT_STATUS] = amount == 0 ? PAYMENT_COMPLETED : PAYMENT_PENDING;
+                        payment[PAYMENT_STATUS] = amount <= 0.5 ? PAYMENT_COMPLETED : PAYMENT_PENDING;
                         payment[PAYMENT_AMOUNT] = amount;
                         data[PAYMENT] = payment;
 
                         pDatabaseInstance->GetReference(ACTIVE).Child(it->user_uid).RemoveValue();
                         pDatabaseInstance->GetReference(USERS).Child(it->user_uid).UpdateChildren(data);
+
                         std::stringstream notifyCmd;
                         notifyCmd << "node FCM/app.js " << it->user_uid << " "
-                                  << ((currentTime - it->enteredTime) / 60) << " " << amount;
+                                  << ((currentTime - it->enteredTime) / 60) << " " << amount << " "
+                                  << (amount <= 0.5 ? "no" : "yes");
                         system(notifyCmd.str().c_str());
                     } else {
                         logger << "Invalid car trying to exit: " << plate >> true;

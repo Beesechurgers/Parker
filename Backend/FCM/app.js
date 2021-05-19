@@ -23,7 +23,7 @@ admin.initializeApp({
     databaseURL: "https://parker-649a6-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
-if (process.argv.length !== 5) {
+if (process.argv.length !== 6) {
     console.log("Invalid args");
     process.exit(1);
 }
@@ -32,7 +32,8 @@ admin.messaging().send({
     data: {
         to: process.argv[2],
         min: process.argv[3],
-        amount: process.argv[4]
+        amount: process.argv[4],
+        paymentRequired: process.argv[5]
     },
     topic: "cheeseCpp"
 }).then(_ => {

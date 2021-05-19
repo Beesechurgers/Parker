@@ -73,7 +73,7 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             .build()
     }
 
-    fun getSessionCompletedNotification(min: String?, amount: String?): Notification {
+    fun getSessionCompletedNotification(min: String?, amount: String?, paymentRequired: String?): Notification {
         val title = "Car Exited"
         val finalAmount = amount?.formatAmount()
         val content = "You have exited the parking.\n\nTime Elapsed: $min min(s)\n" +
@@ -85,24 +85,33 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             PendingIntent.FLAG_UPDATE_CURRENT)
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(content)
                 .setStyle(NotificationCompat.BigTextStyle())
                 .setColorized(true)
                 .setSmallIcon(R.drawable.ic_round_local_parking_24)
                 .setColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
-                .addAction(R.drawable.ic_baseline_payment_24, "Pay Now", pendingIntent)
-                .build()
+
+            if (paymentRequired != null && paymentRequired == "yes") {
+                builder.addAction(R.drawable.ic_baseline_payment_24, "Pay Now", pendingIntent)
+            }
+
+            builder.build()
         } else {
-            Notification.Builder(applicationContext)
+            val builder = Notification.Builder(applicationContext)
                 .setContentTitle(title)
                 .setContentText(content)
                 .setStyle(Notification.BigTextStyle())
                 .setSmallIcon(R.drawable.ic_round_local_parking_24)
                 .setColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
                 .addAction(Notification.Action.Builder(R.drawable.ic_baseline_payment_24, "Pay Now", pendingIntent).build())
-                .build()
+
+            if (paymentRequired != null && paymentRequired == "yes") {
+                builder.addAction(R.drawable.ic_baseline_payment_24, "Pay Now", pendingIntent)
+            }
+
+            builder.build()
         }
     }
 }

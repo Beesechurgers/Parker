@@ -38,7 +38,8 @@ class FirebaseService : FirebaseMessagingService() {
                 val data = remoteMessage.data
                 with(NotificationHelper(this)) {
                     Log.d(TAG, "onMessageReceived: Notifying user")
-                    this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionCompletedNotification(data["min"], data["amount"]))
+                    this.getManager().notify(NotificationHelper.NOTIFICATION_ID,
+                        this.getSessionCompletedNotification(data["min"], data["amount"], data["paymentRequired"]))
                 }
             }
         }
