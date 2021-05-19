@@ -102,7 +102,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshStatus() {
         mUserRef.valueEvenListener(onDataChange = {
+            // Default: this card should not be visible
             live_session_card.visibility = View.GONE
+
+            // Show this card with data only when [DatabaseConstants.CAR_STATUS] is ENTERED
             val carStatus = it.child(DatabaseConstants.CAR_STATUS).value.toString()
             if (carStatus == DatabaseConstants.ENTERED) {
 
@@ -117,7 +120,10 @@ class MainActivity : AppCompatActivity() {
                 live_session_card.visibility = View.VISIBLE
             }
 
+            // Default: this card should not be visible
             pending_payment_card.visibility = View.GONE
+
+            // Show this car only when payment is pending
             val paymentStatus = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_STATUS).value.toString()
             if (paymentStatus == DatabaseConstants.PAYMENT_PENDING) {
                 val amount = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_AMOUNT).value.toString()
@@ -134,6 +140,12 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Get estimated payment amount from the time user entered
+     * till current (i.e. the time this function is called)
+     *
+     * @param timeElapsed current_time - entered_time
+     */
     private fun getEstimatedAmount(timeElapsed: Long): Double {
         var payment: Double = 0.0
         var time = timeElapsed

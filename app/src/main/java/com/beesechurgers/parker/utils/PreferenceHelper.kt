@@ -21,9 +21,10 @@ import com.ironz.binaryprefs.Preferences
 const val PKG_PREF = "_parker"
 
 object PrefKeys {
-    // String key
+    // String key for store user car number
     const val CAR_NUMBER = "car_number"
 
+    // String key to store user profile pic url i.e from google account
     const val USER_PHOTO = "photo_url"
 }
 

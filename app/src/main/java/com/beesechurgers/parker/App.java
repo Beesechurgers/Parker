@@ -24,6 +24,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class App extends Application implements CameraXConfig.Provider {
 
+    /**
+     * Initialized cameraX config used in {@link ScannerActivity}
+     */
     @NonNull
     @NotNull
     @Override

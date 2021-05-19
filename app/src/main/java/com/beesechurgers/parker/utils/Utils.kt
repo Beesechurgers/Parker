@@ -28,6 +28,11 @@ object Utils {
 
     const val INVALID_STRING = "#@$"
 
+    /**
+     * Function to be called when logging out user
+     *
+     * Clears stored preferences
+     */
     @JvmStatic
     fun clearUserData(context: Context) {
         with(INVALID_STRING) {
@@ -36,6 +41,9 @@ object Utils {
         }
     }
 
+    /**
+     * Function to validate car number input from [AppCompatEditText]
+     */
     @JvmStatic
     fun validateCarNumber(carNumberInput: AppCompatEditText): String {
         val number = carNumberInput.text?.toString()?.trim()?.replace(" ", "")
@@ -53,8 +61,14 @@ object Utils {
         }
     }
 
+    /**
+     * Extended [String] function to validate Indian car number
+     */
     fun String.isValidCarNumber() = Pattern.matches("[A-Z]{2}[0-9]{1,2}(?:[A-Z])?(?:[A-Z]*)?[0-9]{4}", this)
 
+    /**
+     * Extended [String] function to format the amount passed from server
+     */
     fun String.formatAmount(): String {
         return if (this.contains('.')) {
             if (this.split('.')[1].length > 2) {
@@ -63,6 +77,9 @@ object Utils {
         } else "$this.00"
     }
 
+    /**
+     * Extended [DatabaseReference] function to get data snapshot from database
+     */
     fun DatabaseReference.valueEvenListener(onDataChange: (snapshot: DataSnapshot) -> Unit, onCancelled: (error: DatabaseError) -> Unit = {}) {
         this.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -74,6 +91,9 @@ object Utils {
         })
     }
 
+    /**
+     * Function to check if device is connected to network
+     */
     fun Context.isNetworkConnected(): Boolean {
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork = cm.activeNetwork

@@ -31,6 +31,11 @@ import com.beesechurgers.parker.R
 import com.beesechurgers.parker.utils.Utils
 import com.beesechurgers.parker.utils.Utils.formatAmount
 
+/**
+ * Helper class for notification
+ *
+ * Helps manage notification for SDK above Android Oreo
+ */
 class NotificationHelper(context: Context) : ContextWrapper(context) {
 
     companion object {
@@ -56,6 +61,9 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
 
     fun getManager() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+    /**
+     * Returns notification of when session starts (user enters parking after scan)
+     */
     fun getSessionStartedNotification(): Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle("Session Started")
@@ -73,6 +81,9 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             .build()
     }
 
+    /**
+     * Returns notification of when session has completed (user exits parking)
+     */
     fun getSessionCompletedNotification(min: String?, amount: String?, paymentRequired: String?): Notification {
         val title = "Car Exited"
         val finalAmount = amount?.formatAmount()

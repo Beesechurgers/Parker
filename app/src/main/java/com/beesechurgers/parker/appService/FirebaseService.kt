@@ -19,6 +19,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
+/**
+ * A firebase service to receive notification
+ */
 class FirebaseService : FirebaseMessagingService() {
 
     companion object {
@@ -34,6 +37,7 @@ class FirebaseService : FirebaseMessagingService() {
 
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
+            // Notify is message received is valid
             if (remoteMessage.from == "/topics/cheeseCpp" && remoteMessage.data["to"] == user.uid) {
                 val data = remoteMessage.data
                 with(NotificationHelper(this)) {

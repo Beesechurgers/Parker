@@ -72,6 +72,7 @@ class PaymentActivity : AppCompatActivity() {
         }
     }
 
+    // If information is not passed through intent data, load it from database
     private fun loadFromDB(uid: String) {
         FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(uid).valueEvenListener(onDataChange = {
             checkNull(it.child(DatabaseConstants.ENTERED_TIME).value?.toString(),

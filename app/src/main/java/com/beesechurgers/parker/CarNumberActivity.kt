@@ -40,7 +40,7 @@ class CarNumberActivity : AppCompatActivity() {
 
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
-        if (user == null) {
+        if (user == null) {     // Return if user is NULL; Do not continue
             super.onBackPressed()
             return
         }
@@ -76,9 +76,11 @@ class CarNumberActivity : AppCompatActivity() {
         }
     }
 
+    // Add car number to user database
     private fun handlerCarNumber(number: String, rootRef: DatabaseReference, user: FirebaseUser) {
         var exists = false
         rootRef.valueEvenListener(onDataChange = { snap ->
+            // Check if provided car number doesn't already exists
             for (child in snap.children) {
                 if (child.child(DatabaseConstants.NUMBER_PLATE).value.toString() == number) {
                     reg_car_number.error = "Car number already exists"

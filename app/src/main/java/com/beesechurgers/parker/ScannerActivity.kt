@@ -71,18 +71,21 @@ class ScannerActivity : AppCompatActivity() {
         cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         re_scan_btn.setOnClickListener {
+            // Handle view when re-scan button is clicked
             re_scan_btn.visibility = View.GONE
             scan_process.visibility = View.GONE
             scan_error_layout.visibility = View.GONE
             qr_scan_layout.visibility = View.VISIBLE
             scanned_data.text = ""
+
+            // Start camera
             handleCameraPermission()
         }
         handleCameraPermission()
     }
 
     private fun handleCameraPermission() {
-        if (isScanning) return
+        if (isScanning) return  // Don't go any further if camera is already started
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera()
         } else {
@@ -91,6 +94,7 @@ class ScannerActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_CODE) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startCamera()
@@ -122,14 +126,16 @@ class ScannerActivity : AppCompatActivity() {
         val imageAnalysis = ImageAnalysis.Builder().setTargetResolution(Size(1280, 720))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build().apply {
                 this.setAnalyzer(ContextCompat.getMainExecutor(this@ScannerActivity),
-                    QRCodeImageAnalyzer { data ->
+                    QRCodeImageAnalyzer { data ->   // Handle the data provided when QR code is scanned
                         if (!isNetworkConnected()) {
                             Toast.makeText(this@ScannerActivity, "You're Offline", Toast.LENGTH_SHORT).show()
                             return@QRCodeImageAnalyzer
                         }
 
+                        // Turn off camera
                         cameraProvider?.unbindAll()
 
+                        // Update UI according to data
                         if (data.contains("/")) {
                             with(data.split("/")) {
                                 val session = this[0]
@@ -162,17 +168,25 @@ class ScannerActivity : AppCompatActivity() {
         cameraProvider?.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, imageAnalysis, preview, imageCapture)
     }
 
+    // Function to start session when parsed data from QR code is valid
     private fun startSession(session: String) {
         FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS).child(mUser.uid).valueEvenListener(onDataChange = {
             val status = it.child(DatabaseConstants.CAR_STATUS).value
             val paymentStatus = it.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_STATUS).value
 
+            // car status and payment status should not be null
             if (status != null && paymentStatus != null) {
+
+                // car status should be EXITED
                 if (status.toString() != DatabaseConstants.ENTERED) {
+                    // payment status should be COMPLETED
                     if (paymentStatus.toString() != DatabaseConstants.PAYMENT_PENDING) {
+
+                        // Init session
                         mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
                             this[DatabaseConstants.SESSION] = session
                         }).addOnCompleteListener {
+                            // Notify user on started
                             with(NotificationHelper(this)) {
                                 this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionStartedNotification())
                             }
@@ -199,6 +213,10 @@ class ScannerActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Sends cancellation signal to firebase_database/Server which
+     * backend listens and discard generated session ID and QR code
+     */
     private fun sendCancelSessionNotification() {
         FirebaseDatabase.getInstance().getReference("Server").child("Cancel").setValue(System.currentTimeMillis())
     }

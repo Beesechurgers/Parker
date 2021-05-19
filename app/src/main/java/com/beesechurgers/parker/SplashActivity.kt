@@ -50,12 +50,14 @@ class SplashActivity : AppCompatActivity() {
 
         mAuth = FirebaseAuth.getInstance()
         mRootRef = FirebaseDatabase.getInstance().getReference(DatabaseConstants.USERS)
+        // Init google sign in client
         val googleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build())
 
         if (mAuth.currentUser != null) {
+            // Starts MainActivity if user is not NULL and stored car number from user is VALID
             startActivity(if (getString(PrefKeys.CAR_NUMBER).isValidCarNumber()) MainActivity::class.java else CarNumberActivity::class.java)
         } else {
             login_layout.visibility = View.VISIBLE
@@ -71,7 +73,7 @@ class SplashActivity : AppCompatActivity() {
             login_progress.visibility = View.VISIBLE
 
             googleSignInClient.signOut()
-            startActivityForResult(googleSignInClient.signInIntent, RC_SIGN_IN)
+            startActivityForResult(googleSignInClient.signInIntent, RC_SIGN_IN) // Init google sign in process
         }
     }
 

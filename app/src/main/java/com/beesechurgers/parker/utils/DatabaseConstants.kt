@@ -14,6 +14,9 @@
 
 package com.beesechurgers.parker.utils
 
+/**
+ * Constants referred in database [check database_constants.h]
+ */
 object DatabaseConstants {
 
     const val USERS = "Users"
