@@ -32,7 +32,7 @@ class PayHistoryAdapter(private val list: List<PaymentHistoryItem>) : RecyclerVi
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: PaymentHistoryViewHolder, position: Int) {
-        val item = list[position]
+        val item = list[list.size - position - 1]
         val calendar = Calendar.getInstance().apply { this.timeInMillis = item.seconds * 1000 }
         holder.dateTime.text = DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time) +
             " " + DateFormat.getDateInstance(DateFormat.FULL).format(calendar.time)
