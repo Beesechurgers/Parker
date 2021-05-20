@@ -19,6 +19,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.beesechurgers.parker.utils.DatabaseConstants
 import com.beesechurgers.parker.utils.PrefKeys
@@ -77,15 +78,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         logout_fab.setOnClickListener {
-            if (!isNetworkConnected()) {
-                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            AlertDialog.Builder(this, R.style.AppDialogTheme)
+                .setTitle("Are you sure you want to logout ?")
+                .setPositiveButton("Logout") { dialog, _ ->
+                    if (!isNetworkConnected()) {
+                        Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
 
-            FirebaseAuth.getInstance().signOut()
-            Utils.clearUserData(this)
-            startActivity(Intent(this, SplashActivity::class.java)
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+                    FirebaseAuth.getInstance().signOut()
+                    Utils.clearUserData(this)
+                    dialog.dismiss()
+                    startActivity(Intent(this, SplashActivity::class.java)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK))
+                }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                .show()
         }
 
         change_payment_method.setOnClickListener { Toast.makeText(this, "Dummy Payment", Toast.LENGTH_SHORT).show() }
