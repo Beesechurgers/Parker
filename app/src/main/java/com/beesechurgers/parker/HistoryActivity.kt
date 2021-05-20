@@ -14,6 +14,7 @@
 package com.beesechurgers.parker
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,10 +27,6 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_history.*
 
 class HistoryActivity : AppCompatActivity() {
-
-    companion object {
-        private const val TAG = "HistoryActivity"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +53,9 @@ class HistoryActivity : AppCompatActivity() {
                     child.child(DatabaseConstants.EXITED_TIME).value.toString().toLong(),
                     child.child(DatabaseConstants.ENTERED_TIME).value.toString().toLong(),
                     child.child(DatabaseConstants.PAYMENT).child(DatabaseConstants.PAYMENT_AMOUNT).value.toString()))
+            }
+            if (list.isEmpty()) {
+                empty_history_text.visibility = View.VISIBLE
             }
 
             payment_history_view.adapter = null
