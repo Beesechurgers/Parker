@@ -1,6 +1,6 @@
 # Parker
 
-#### A parking automizing system, where all that user needs to do is scan QR code on entering, and exit without doing anything else.<br> <br>
+#### A minimalist parking system, where all that user needs to do is scan QR code on entering, and exit without doing anything else.<br> <br>
 
 ## How it works
 - **Setup:** <br>
