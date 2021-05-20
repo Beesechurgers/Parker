@@ -24,25 +24,21 @@ The car will again stop at exit barricade and the camera on it will scan and det
 
 <img src="images/parker_launcher.png" width="360" height="640"> &nbsp;
 <img src="images/parker_car_number.png" width="360" height="640"> &nbsp;
-<img src="images/parker_plain_main.png" width="360" height="640"> &nbsp; <br>
-
+<img src="images/parker_plain_main.png" width="360" height="640"> &nbsp;
 <img src="images/parker_scan_qrcode.png" width="360" height="640"> &nbsp;
 <img src="images/parker_session_started.png" width="360" height="640"> &nbsp;
-<img src="images/parker_ongoin_session.png" width="360" height="640"> &nbsp; <br>
-
+<img src="images/parker_ongoin_session.png" width="360" height="640"> &nbsp;
 <img src="images/parker_session_completed.png" width="360" height="640"> &nbsp;
 <img src="images/parker_pending_payment.png" width="360" height="640"> &nbsp;
-<img src="images/parker_pay_now.png" width="360" height="640"> &nbsp; <br>
-
+<img src="images/parker_pay_now.png" width="360" height="640"> &nbsp;
 <img src="images/parker_payment_history.png" width="360" height="640"> &nbsp;
-</details> <br><br>
+</details>
 
 ## Tool, Frameworks and Languages used
 | Product | Tool | Frameworks | Languages |
 |:-------:|:-----:|:----------:|:---------:|
 | App     | Android Studio | AndroidX<br>Firebase<br>Material UI<br>CameraX | Kotlin <br>Java <br>XML |
 | Command Line<br>Backend | CLion | Firebase<br>Node js<br>OpenCV<br>Tesseract-OCR | C++<br>Python<br>Javascript |
-<br><br>
 
 ## Developers
 - Shashank Verma
