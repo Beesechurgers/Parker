@@ -25,10 +25,6 @@
  *    |   |      `- CAR_STATUS: `entered` / `exited`
  *    |   |      `- ENTERED_TIME: -1 / 82372323223
  *    |   |      `- EXITED_TIME: -1 / 29898749843
- *    |   |      `- LAST_LOCATION
- *    |   |             |
- *    |   |             `- LAT: 101.20020202
- *    |   |             `- LONG: 2.3844944949
  *    |   |      `- PAYMENT
  *    |   |            |
  *    |   |            `- PAYMENT_STATUS: Completed / Pending
@@ -41,10 +37,6 @@
  *    |         `- CAR_STATUS: `entered` / `exited`
  *    |         `- ENTERED_TIME: -1 / 2535322879
  *    |         `- EXITED_TIME: -1 / 6478690504
- *    |         `- LAST_LOCATION
- *    |                 |
- *    |                 `- LAT: 101.20020202
- *    |                 `- LONG: 2.3844944949
  *    |         `- PAYMENT
  *    |               |
  *    |               `- PAYMENT_STATUS: Completed / Pending
@@ -59,10 +51,13 @@
  *         |
  *         `- USER_UID
  *              |
- *              `- PAYMENT:
- *                      ...
- *                      ...
- *                      ...
+ *              `- TIME_STAMP_OF_PAYMENT:
+ *                        `- ENTERED_TIME: 2535322879
+ *                        `- EXITED_TIME: 6478690504
+ *                        `- PAYMENT
+ *                              |
+ *                              `- PAYMENT_STATUS: Completed
+ *                              `- PAYMENT_AMOUNT: amount
  */
 
 #define USERS "Users"
