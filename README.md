@@ -1,6 +1,6 @@
 # Parker
 
-#### A parking automizing system, where all that user need to do is scan QR code on entering, and exit without doing anything <br> <br>
+#### A parking automizing system, where all that user needs to do is scan QR code on entering, and exit without doing anything else.<br> <br>
 
 ## How it works
 - **Setup:** <br>
@@ -16,7 +16,7 @@ The camera on barricade will scan and detect the number plate and generate QR co
 Once driver scans this QR code from app, the session will start and barricade will open. Driver can now park the car. <br> <br>
 
 - **Parking Exit:** <br>
-The car will again stop at exit barricade and the camera on it will scan and detect the number plate. If the number plate is the same that entered previously, then terminate the session, notify driver with the calculated amount and barricade will open for car to exit. <br><br>
+The car will again stop at exit barricade and the camera on it will scan and detect the number plate. If the number plate is the same that entered previously, then it will terminate the session, notify driver with the calculated amount and barricade will open for car to exit. <br><br>
 
 ## Screenshots of App
 <details>
