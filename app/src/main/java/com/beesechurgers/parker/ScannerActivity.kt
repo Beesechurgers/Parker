@@ -194,16 +194,16 @@ class ScannerActivity : AppCompatActivity() {
                                     this["by"] = mUser.uid
                                 })
 
-                        // Init session
-                        mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
-                            this[DatabaseConstants.SESSION] = session
-                        }).addOnCompleteListener {
-                            // Notify user on started
-                            with(NotificationHelper(this)) {
-                                this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionStartedNotification())
-                            }
-                            super.onBackPressed()
-                        }
+                                // Init session
+                                mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
+                                    this[DatabaseConstants.SESSION] = session
+                                }).addOnCompleteListener {
+                                    // Notify user on started
+                                    with(NotificationHelper(this)) {
+                                        this.getManager().notify(NotificationHelper.NOTIFICATION_ID, this.getSessionStartedNotification())
+                                    }
+                                    super.onBackPressed()
+                                }
                             }
                         })
                     } else {
