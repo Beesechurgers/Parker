@@ -14,6 +14,8 @@
 
 // Code to send notification to specific user
 
+const uuid = require('uuid');
+const fs = require('fs');
 const admin = require('firebase-admin');
 
 const serviceAccount = require("./parker-649a6-firebase-adminsdk-3kh7r-9f0ce7ce45.json");
@@ -31,8 +33,23 @@ admin.initializeApp({
 // 5. amount
 // 6. paymentRequired
 if (process.argv.length !== 6) {
-    console.log("Invalid args");
-    process.exit(1);
+
+    // Another way to saying that we need uuid
+    // Refer sessions value to detect that we don't generate any used UUID
+    admin.database().ref("Session_Used").get().then(snapshot => {
+        let generatedUUID = uuid.v4();
+        if (snapshot.hasChildren()) {
+            while (snapshot.hasChild(generatedUUID)) {   // Loop until generated UUID is not used
+                generatedUUID = uuid.v4();
+            }
+        }
+        // Write that to file
+        fs.writeFile('helpers/session.txt', generatedUUID, function (err) {
+            console.log("File error:", err);
+            process.exit(0);
+        });
+    });
+    return;
 }
 
 const uid = process.argv[2];

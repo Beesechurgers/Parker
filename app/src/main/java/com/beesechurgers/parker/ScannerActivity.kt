@@ -182,6 +182,18 @@ class ScannerActivity : AppCompatActivity() {
                     // payment status should be COMPLETED
                     if (paymentStatus.toString() != DatabaseConstants.PAYMENT_PENDING) {
 
+                        // The session UUID shouldn't be "used"
+                        FirebaseDatabase.getInstance().getReference(DatabaseConstants.SESSION_IDS).valueEvenListener(onDataChange = { sessionSnapshot ->
+                            if (sessionSnapshot.hasChild(session)) {
+                                Toast.makeText(this, "SESSION ALREADY IN USE", Toast.LENGTH_SHORT).show()
+                                super.onBackPressed()
+                            } else {
+                                // Add session to "used" session
+                                FirebaseDatabase.getInstance().getReference(DatabaseConstants.SESSION_IDS).child(session).updateChildren(HashMap<String, Any>().apply {
+                                    this["at"] = System.currentTimeMillis() / 1000
+                                    this["by"] = mUser.uid
+                                })
+
                         // Init session
                         mActiveRef.child(mUser.uid).updateChildren(HashMap<String, Any>().apply {
                             this[DatabaseConstants.SESSION] = session
@@ -192,6 +204,8 @@ class ScannerActivity : AppCompatActivity() {
                             }
                             super.onBackPressed()
                         }
+                            }
+                        })
                     } else {
                         qr_scan_layout.visibility = View.GONE
                         scan_process.visibility = View.GONE

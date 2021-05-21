@@ -18,7 +18,6 @@ import re
 import signal
 import string
 import sys
-import uuid
 
 import cv2
 import imutils
@@ -105,7 +104,7 @@ finally:
     if not os.path.exists("car.jpg"):
         cv2.imwrite("car.jpg", std_img)
 
-    session_id = str(uuid.uuid4())
+    session_id = str(sys.argv[3])
 
     with open("car.jpg", 'rb') as fp:
         response = requests.post('https://api.platerecognizer.com/v1/plate-reader/',

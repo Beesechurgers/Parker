@@ -43,4 +43,6 @@ object DatabaseConstants {
     const val HISTORY = "History"
 
     const val TOKENS = "Tokens"
+
+    const val SESSION_IDS = "Session_Used"
 }

@@ -254,18 +254,29 @@ int main(int argc, char *argv[]) {
         // ----------------------------------------------------------------------------------------------
         for (;;) {
             sleep(1);
+            // Loop until login is not completed and qr is not scanned
             if (!loginCompleted) continue;
             if (!qrScanned) continue;
-            cleanData();
+            cleanData();    // Clean data for new user
 
             int option = errorTriggered ? 'q' : getOption();
             system("clear");
 
             if (option == '1') {
                 logger << "|Option: Enter car|" >> false;
-                int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 1")[0]);
+
+                // Get valid un-used session UUID
+                int gotSession = system("node FCM/app.js");
+                std::string sessionUUID = gotSession == 0 ? getSessionID() : "None";
+
+                // Run detection program
+                std::stringstream cmd;
+                cmd << "cd helpers && python3 detector.py " << API_KEY << " 1 " << sessionUUID;
+                int completed = system(cmd.str().c_str());
                 if (completed == 0) {
                     logger << "Task completed" >> true;
+
+                    // Get number plate from file (stored by detection program)
                     std::string plate = getNumberPlate();
                     if (plate == "None") {
                         logger << "Invalid License Number" >> true;
@@ -288,9 +299,13 @@ int main(int argc, char *argv[]) {
 
             } else if (option == '2') {
                 logger << "|Option: Exit car|" >> false;
-                int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 2")[0]);
+
+                // Run detection program
+                int completed = system(&("cd helpers && python3 detector.py " + API_KEY + " 2 None")[0]);
                 if (completed == 0) {
                     logger << "Task completed" >> true;
+
+                    // Get number plate from file (stored by detection program)
                     std::string plate = getNumberPlate();
                     if (plate == "None") {
                         logger << "Invalid License Number: " << plate >> true;
@@ -298,10 +313,13 @@ int main(int argc, char *argv[]) {
                     }
                     logger << "License Number: " << plate >> true;
 
+                    // Find the detected number plate in the "entered car" list
                     auto it = std::find_if(numberPlates.begin(), numberPlates.end(),
                                            [&number = plate](const CarUser &c) -> bool {
                                                return c.carNumber == number;
                                            });
+
+                    // If it is found then ...
                     if (it != numberPlates.end()) {
                         logger << "Valid car exited" >> true;
                         logger << "This car belongs to " << it->user_uid >> false;
