@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.*
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_splash.*
 
 class SplashActivity : AppCompatActivity() {
@@ -78,43 +79,63 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun handleUser(name: String, user: FirebaseUser) {
-        mRootRef.valueEvenListener(onDataChange = { rootSnap ->
-            Toast.makeText(this@SplashActivity, "Welcome $name", Toast.LENGTH_SHORT).show()
-            if (rootSnap.hasChild(user.uid)) {
-                Log.d(TAG, "onDataChange: User exists")
+        // Delete any previous token
+        FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
 
-                mRootRef.child(user.uid).valueEvenListener(onDataChange = {
-                    with(it.child(DatabaseConstants.NUMBER_PLATE).value.toString()) {
-                        if (this.isValidCarNumber()) {
-                            putString(PrefKeys.CAR_NUMBER, this)
-                            startActivity(MainActivity::class.java)
+            // No need to worry whether it was successful
+            // because this token is device specific
+            FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+
+                // Update the new or same token on current user uid
+                FirebaseDatabase.getInstance().getReference(DatabaseConstants.TOKENS).updateChildren(HashMap<String, Any>().apply {
+                    this[user.uid] = token
+                }).addOnCompleteListener {
+
+                    // Continue with user handling
+                    Log.d(TAG, "handleUser: Token updated")
+                    mRootRef.valueEvenListener(onDataChange = { rootSnap ->
+                        Toast.makeText(this@SplashActivity, "Welcome $name", Toast.LENGTH_SHORT).show()
+
+                        // Database has current user uid -> user exists
+                        if (rootSnap.hasChild(user.uid)) {
+                            Log.d(TAG, "onDataChange: User exists")
+
+                            // Just validate number plate and start accordingly
+                            mRootRef.child(user.uid).valueEvenListener(onDataChange = {
+                                with(it.child(DatabaseConstants.NUMBER_PLATE).value.toString()) {
+                                    if (this.isValidCarNumber()) {
+                                        putString(PrefKeys.CAR_NUMBER, this)
+                                        startActivity(MainActivity::class.java)
+                                    } else {
+                                        startActivity(CarNumberActivity::class.java)
+                                    }
+                                }
+                            })
                         } else {
-                            startActivity(CarNumberActivity::class.java)
-                        }
-                    }
-                })
-            } else {
-                Log.d(TAG, "onDataChange: New user")
+                            Log.d(TAG, "onDataChange: New user")
 
-                mRootRef.child(user.uid).updateChildren(
-                    HashMap<String, Any>().apply {
-                        this[DatabaseConstants.NUMBER_PLATE] = Utils.INVALID_STRING
-                        this[DatabaseConstants.CAR_STATUS] = DatabaseConstants.EXITED
-                        this[DatabaseConstants.ENTERED_TIME] = DatabaseConstants.INVALID_TIME
-                        this[DatabaseConstants.EXITED_TIME] = DatabaseConstants.INVALID_TIME
+                            mRootRef.child(user.uid).updateChildren(
+                                HashMap<String, Any>().apply {
+                                    this[DatabaseConstants.NUMBER_PLATE] = Utils.INVALID_STRING
+                                    this[DatabaseConstants.CAR_STATUS] = DatabaseConstants.EXITED
+                                    this[DatabaseConstants.ENTERED_TIME] = DatabaseConstants.INVALID_TIME
+                                    this[DatabaseConstants.EXITED_TIME] = DatabaseConstants.INVALID_TIME
 
-                        this[DatabaseConstants.PAYMENT] = HashMap<String, Any>().apply {
-                            this[DatabaseConstants.PAYMENT_AMOUNT] = 0.0
-                            this[DatabaseConstants.PAYMENT_STATUS] = DatabaseConstants.PAYMENT_COMPLETED
+                                    this[DatabaseConstants.PAYMENT] = HashMap<String, Any>().apply {
+                                        this[DatabaseConstants.PAYMENT_AMOUNT] = 0.0
+                                        this[DatabaseConstants.PAYMENT_STATUS] = DatabaseConstants.PAYMENT_COMPLETED
+                                    }
+                                }
+                            ).addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    startActivity(CarNumberActivity::class.java)
+                                }
+                            }
                         }
-                    }
-                ).addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        startActivity(CarNumberActivity::class.java)
-                    }
+                    })
                 }
             }
-        })
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

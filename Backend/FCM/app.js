@@ -35,19 +35,31 @@ if (process.argv.length !== 6) {
     process.exit(1);
 }
 
-// Send notification
-admin.messaging().send({
-    data: {
-        to: process.argv[2],
-        min: process.argv[3],
-        amount: process.argv[4],
-        paymentRequired: process.argv[5]
-    },
-    topic: "cheeseCpp"
-}).then(_ => {
-    console.log("Sent Notification");
-    process.exit(0);
-}).catch(error => {
-    console.log("Error: ", error);
-    process.exit(1);
+const uid = process.argv[2];
+// Take "Tokens" table reference
+admin.database().ref("Tokens").child(uid).get().then(snapshot => {
+
+    // Get token from user uid
+    const userToken = snapshot.val();
+    if (userToken === null) {
+        console.log("User token was null");
+        process.exit(1);
+    }
+
+    // Send notification
+    admin.messaging().send({
+        data: {
+            to: uid,
+            min: process.argv[3],
+            amount: process.argv[4],
+            paymentRequired: process.argv[5]
+        },
+        token: userToken
+    }).then(_ => {
+        console.log("Sent Notification");
+        process.exit(0);
+    }).catch(error => {
+        console.log("Error: ", error);
+        process.exit(1);
+    });
 });

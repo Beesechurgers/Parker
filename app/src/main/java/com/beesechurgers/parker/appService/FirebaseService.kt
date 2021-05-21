@@ -29,7 +29,7 @@ class FirebaseService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        Log.d(TAG, "onNewToken: $token")
+        Log.d(TAG, "onNewToken")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -38,7 +38,7 @@ class FirebaseService : FirebaseMessagingService() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             // Notify is message received is valid
-            if (remoteMessage.from == "/topics/cheeseCpp" && remoteMessage.data["to"] == user.uid) {
+            if (remoteMessage.data["to"] == user.uid) {
                 val data = remoteMessage.data
                 with(NotificationHelper(this)) {
                     Log.d(TAG, "onMessageReceived: Notifying user")

@@ -41,4 +41,6 @@ object DatabaseConstants {
     const val INVALID_SESSION = "__null__"
 
     const val HISTORY = "History"
+
+    const val TOKENS = "Tokens"
 }
