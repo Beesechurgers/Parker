@@ -13,6 +13,7 @@
  */
 package com.beesechurgers.parker
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -61,5 +62,10 @@ class HistoryActivity : AppCompatActivity() {
             payment_history_view.adapter = null
             payment_history_view.adapter = PayHistoryAdapter(list)
         })
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 }

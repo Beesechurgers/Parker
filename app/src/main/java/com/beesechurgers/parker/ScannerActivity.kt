@@ -17,6 +17,7 @@ package com.beesechurgers.parker
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Size
 import android.view.View
@@ -233,5 +234,10 @@ class ScannerActivity : AppCompatActivity() {
      */
     private fun sendCancelSessionNotification() {
         FirebaseDatabase.getInstance().getReference("Server").child("Cancel").setValue(System.currentTimeMillis())
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        recreate()
     }
 }

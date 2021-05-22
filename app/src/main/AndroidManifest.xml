@@ -29,18 +29,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkerApp">
-        <activity android:name=".HistoryActivity"></activity>
-        <activity android:name=".PaymentActivity" />
-        <activity android:name=".ScannerActivity" />
+        <activity
+            android:name=".HistoryActivity"
+            android:configChanges="uiMode"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PaymentActivity"
+            android:configChanges="uiMode"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ScannerActivity"
+            android:configChanges="uiMode"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".CarNumberActivity"
-            android:configChanges="uiMode" />
+            android:configChanges="uiMode"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:configChanges="uiMode" />
+            android:configChanges="uiMode"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SplashActivity"
             android:configChanges="uiMode"
+            android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
