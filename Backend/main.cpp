@@ -64,7 +64,7 @@ void cleanData();
 void initApiKey();
 
 /**
- * Get session UUID from the file saved by detector.py
+ * Get session UUID from the file saved by app.js
  */
 std::string getSessionID();
 
@@ -328,16 +328,20 @@ int main(int argc, char *argv[]) {
                         auto currentTime = std::time(nullptr);
                         double amount = getPayment(currentTime - it->enteredTime);
 
-                        data[CAR_STATUS] = EXITED;
-                        data[EXITED_TIME] = currentTime;
+                        data[CAR_STATUS] = EXITED;          // Set car status to exited
+                        data[EXITED_TIME] = currentTime;    // Set exit time to current time
 
+                        // Rare of exiting parking lot in less than a minute, no need of payment
                         payment[PAYMENT_STATUS] = amount <= 0.5 ? PAYMENT_COMPLETED : PAYMENT_PENDING;
                         payment[PAYMENT_AMOUNT] = amount;
                         data[PAYMENT] = payment;
 
+                        // Remove active session
                         pDatabaseInstance->GetReference(ACTIVE).Child(it->user_uid).RemoveValue();
+                        // Update User database
                         pDatabaseInstance->GetReference(USERS).Child(it->user_uid).UpdateChildren(data);
 
+                        // Notify user
                         std::stringstream notifyCmd;
                         notifyCmd << "node FCM/app.js " << it->user_uid << " "
                                   << ((currentTime - it->enteredTime) / 60) << " " << amount << " "
@@ -430,18 +434,17 @@ void updateNumberList(const firebase::database::DataSnapshot &snapshot) {
     long long count = 0;
     for (const auto &child : snapshot.children()) {
         if (child.Child(CAR_STATUS).value().mutable_string() == ENTERED) {
-            count++;
             CarUser car;
             car.carNumber = child.Child(NUMBER_PLATE).value().mutable_string();
             car.user_uid = child.key_string();
             car.enteredTime = (long long) child.Child(ENTERED_TIME).value().int64_value();
+            numberPlates.push_back(car);
 
+            count++;
             logger << count << ": number = " << car.carNumber >> false;
             logger << "uid = " << car.user_uid >> false;
             logger << "enter time = " << car.enteredTime >> false;
-
-            numberPlates.push_back(car);
-            logger << "Pushed: " << car.carNumber >> false;
+            logger << "Pushed" >> false;
         }
     }
     logger << "-------------------------------------------" >> false;
@@ -449,9 +452,15 @@ void updateNumberList(const firebase::database::DataSnapshot &snapshot) {
 
 double getPayment(long long timeElapsed) {
     double payment = 0.0;
+
+    // Current provide time is in seconds
     logger << "Payment: sec = " << timeElapsed >> false;
+
+    // convert to minutes
     timeElapsed = timeElapsed / 60;
     logger << "Payment: min = " << timeElapsed >> false;
+
+    // Calculate according to minutes
     if (timeElapsed >= 60) {
         long long multiple = timeElapsed / 60;
         payment += PER_HOUR * multiple;
