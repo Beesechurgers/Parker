@@ -50,4 +50,6 @@
     <string name="payment_history">Payment History</string>
     <string name="payment_history_amount">Amount: \u20B9 %s</string>
     <string name="no_history_yet">No history yet</string>
+    <string name="refresh">Refresh</string>
+    <string name="copyright">Copyright \u00A9 2021, Beesechurgers</string>
 </resources>

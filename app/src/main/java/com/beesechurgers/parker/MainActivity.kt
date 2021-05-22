@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mUserRef: DatabaseReference
     private var mUser: FirebaseUser? = null
 
+    private var mHasRefreshed = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -104,10 +106,23 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, HistoryActivity::class.java))
         }
 
+        main_refresh.setOnClickListener {
+            if (!isNetworkConnected()) {
+                Toast.makeText(this, "You're Offline", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (mHasRefreshed) {
+                refreshStatus()
+            } else {
+                Toast.makeText(this, "Please wait, already refreshing", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         refreshStatus()
     }
 
     private fun refreshStatus() {
+        mHasRefreshed = false
         mUserRef.valueEvenListener(onDataChange = {
             // Default: this card should not be visible
             live_session_card.visibility = View.GONE
@@ -144,6 +159,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 pending_payment_card.visibility = View.VISIBLE
             }
+            mHasRefreshed = true
         })
     }
 

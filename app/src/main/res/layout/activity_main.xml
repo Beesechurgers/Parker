@@ -274,6 +274,27 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/main_refresh"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="16dp"
+                android:text="@string/refresh"
+                android:textAllCaps="false"
+                android:textColor="@color/colorAccent"
+                app:backgroundTint="@color/colorPrimary"
+                app:icon="@drawable/ic_round_refresh_24"
+                app:iconTint="@color/colorAccent"
+                app:rippleColor="@color/colorAccent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/copyright" />
+
         </LinearLayout>
 
     </ScrollView>
